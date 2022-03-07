@@ -1,9 +1,30 @@
 # This is a temporary placeholder to generate the exons per transcript
 # using the zetta url method rather than the API client as it is still
 # out of date
+import argparse
+from ast import arg
 import json
 import pandas as pd
 import urllib.request
+
+def parse_args():
+    """Parse through arguements
+    Returns:
+        args: Variable that you can extract relevant
+        arguements inputs needed
+    """
+    # Read in arguments
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        '-t', '--transcript_file',
+        help='Transcripts listed in a tsv',
+        required=True
+        )
+
+    args = parser.parse_args()
+
+    return args
 
 
 def query_cellbasedict(exon_dict, data):
@@ -42,11 +63,13 @@ def main():
        exons files are the same but these files are appended to other
        files so it's seperate outputs makes it easier for appending files.
     """
-    transcript_list = ['NM_014915', 'NM_000633',
-                    'NM_000061', 'NM_003467', 'NM_002755',
-                    'NM_002661', 'NM_003334', 'NM_014953',
-                    'NM_017709', 'NM_002460', 'NM_032415', 'NM_006015',
-                    'NM_001145785', 'NM_002015', 'NM_001664']
+    args = parse_args()
+    txs_file = open(args.transcript_file, "r")
+    txs_file_read = txs_file.read()
+    transcript_list = txs_file_read.split("\n")
+    transcript_list = list(filter(None, transcript_list))
+    print(transcript_list)
+    txs_file.close()
 
     df = pd.DataFrame()
 
