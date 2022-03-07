@@ -7,6 +7,15 @@ import urllib.request
 
 
 def query_cellbasedict(exon_dict):
+    """Queries info from exon dict
+
+    Args:
+        exon_dict (dictionary): dictionary containing all info
+        about the exon
+
+    Returns:
+        txs_dict (dictionary): a dictionary of selected exo info
+    """
     txs_dict = {}
     txs_dict['chr'] = 'chr' + exon_dict["chromosome"]
     txs_dict['exon_start'] = exon_dict["genomicCodingStart"]
@@ -25,9 +34,6 @@ transcript_list = ['NM_014915', 'NM_000633',
                 'NM_001145785', 'NM_002015', 'NM_001664']
 
 # main function
-# there's a chance the transcript does not exist in cellbase so let's
-# track that
-txs_notin_cellbase = []
 df = pd.DataFrame()
 
 for transcript in transcript_list:
@@ -43,18 +49,18 @@ for transcript in transcript_list:
         print("RefSeq transcript does not exist in cellbase")
     else:
         # number of exons:
-        exons_num = len(data['responses'][0]['results'][0]['exons'])
-
+        all_exons = data['responses'][0]['results'][0]['exons']
         # loop through each exon for a transcript and make a long list of dict
         list_txs_dict = []
-        for exon in range(exons_num):
-            exon_dict = data['responses'][0]['results'][0]['exons'][exon]
-            # print(exon_dict)
-            if exon_dict["phase"] != -1:
-                extracted_exons_dict = query_cellbasedict(exon_dict)
+        for exon in all_exons:
+            if exon["phase"] != -1:
+                # is the exon phase is -1, this means the whole exon
+                # is not translated so we can skip these. also the
+                # start and end will be 0, so its easier to skip.
+                extracted_exons_dict = query_cellbasedict(exon)
                 list_txs_dict.append(extracted_exons_dict)
             else:
-                print("exon " + str(exon) + " is a non coding exon")
+                print(f"exon " + str(exon['exonNumber']) + " is a non coding exon")
 
         # combine all exons into one table for that transcript
         transcript_table = pd.DataFrame(list_txs_dict)
@@ -72,5 +78,5 @@ df2 = df[['chr', 'exon_start', 'exon_end', 'transcript_id']]
 df2.to_csv("coding_unrestricted_athena_GRCh38_myeloid_v2.0_new_capture_regions_only.bed", sep="\t",
         header=False, index=False)
 
-df.to_csv("exons_nirvana_GRCh38_5bp_flank_v2.0_new_capture_regions_only.tsv", sep="\t",
+df.to_csv("exons_cellbase_GRCh38_5bp_flank_v2.0_new_capture_regions_only.tsv", sep="\t",
         header=False, index=False)
