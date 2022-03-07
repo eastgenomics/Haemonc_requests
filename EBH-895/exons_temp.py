@@ -27,6 +27,13 @@ def query_cellbasedict(exon_dict, data):
     return txs_dict
 
 def main():
+    """Generates a file of chr, start, end, gene symbol,
+       transcript and exon number from a list of transcripts.
+
+       Outputs three files, where coding_unrestricted_GRCh38_myeloid and
+       exons files are the same but these files are appended to other
+       files so it's seperate outputs makes it easier for appending files.
+    """
     transcript_list = ['NM_014915', 'NM_000633',
                     'NM_000061', 'NM_003467', 'NM_002755',
                     'NM_002661', 'NM_003334', 'NM_014953',
