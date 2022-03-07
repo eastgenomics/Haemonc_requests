@@ -11,15 +11,23 @@ def query_cellbasedict(exon_dict, data):
 
     Args:
         exon_dict (dictionary): dictionary containing all info
-        about the exon
+        about the exon. Usually take the coding regions of exons.
+        data (dictionary): dictionary containing all informatio about
+        the transcript.
 
     Returns:
-        txs_dict (dictionary): a dictionary of selected exo info
+        txs_dict (dictionary): a dictionary of selected exon info
     """
     txs_dict = {}
     txs_dict['chr'] = 'chr' + exon_dict["chromosome"]
     txs_dict['exon_start'] = exon_dict["genomicCodingStart"]
-    txs_dict['exon_end'] = exon_dict["genomicCodingEnd"]
+    # We need to include the UTR region (negative strand so its the end)
+    # of the ANKRD26 gene. We will use the exon[end] rather than
+    # exon[genomicCodingEnd]
+    if data['responses'][0]['results'][0]['name'] == "ANKRD26" and exon_dict["exonNumber"] == 1:
+        txs_dict['exon_end'] = exon_dict["end"]
+    else:
+        txs_dict['exon_end'] = exon_dict["genomicCodingEnd"]
     txs_dict['gene_symbol'] = data['responses'][0]['results'][0]['name']
     # cannot take from exon as it has the _exonnumber attached to the transcript
     txs_dict['transcript_id'] = data['responses'][0]['results'][0]['id']
