@@ -5,6 +5,7 @@ import json
 import pandas as pd
 import urllib.request
 
+
 def query_cellbasedict(exon_dict):
     txs_dict = {}
     txs_dict['chr'] = 'chr' + exon_dict["chromosome"]
@@ -18,10 +19,10 @@ def query_cellbasedict(exon_dict):
 
 
 transcript_list = ['NM_014915', 'NM_000633',
-                    'NM_000061', 'NM_003467', 'NM_002755',
-                    'NM_002661', 'NM_003334', 'NM_014953',
-                    'NM_017709', 'NM_002460', 'NM_032415', 'NM_006015',
-                    'NM_001145785', 'NM_002015', 'NM_001664']
+                'NM_000061', 'NM_003467', 'NM_002755',
+                'NM_002661', 'NM_003334', 'NM_014953',
+                'NM_017709', 'NM_002460', 'NM_032415', 'NM_006015',
+                'NM_001145785', 'NM_002015', 'NM_001664']
 
 # main function
 # there's a chance the transcript does not exist in cellbase so let's
@@ -65,11 +66,11 @@ df[['exon_start']] = df[['exon_start']] - 5
 df[['exon_end']] = df[['exon_end']] + 5
 
 df.to_csv("coding_unrestricted_GRCh38_myeloid_v2.0_new_capture_regions_only.bed", sep="\t",
-            header=False, index=False)
+        header=False, index=False)
 
 df2 = df[['chr', 'exon_start', 'exon_end', 'transcript_id']]
 df2.to_csv("coding_unrestricted_athena_GRCh38_myeloid_v2.0_new_capture_regions_only.bed", sep="\t",
-            header=False, index=False)
+        header=False, index=False)
 
 df.to_csv("exons_nirvana_GRCh38_5bp_flank_v2.0_new_capture_regions_only.tsv", sep="\t",
-            header=False, index=False)
+        header=False, index=False)
