@@ -1,10 +1,9 @@
 # This is a temporary placeholder to generate the exons per transcript
 # using the zetta url method rather than the API client as it is still
 # out of date
-import urllib.request, json
+import json
 import pandas as pd
-
-# functions
+import urllib.request
 
 def query_cellbasedict(exon_dict):
     txs_dict = {}
@@ -24,7 +23,7 @@ transcript_list = ['NM_014915', 'NM_000633',
                     'NM_017709', 'NM_002460', 'NM_032415', 'NM_006015',
                     'NM_001145785', 'NM_002015', 'NM_001664']
 
-# main function 
+# main function
 # there's a chance the transcript does not exist in cellbase so let's
 # track that
 txs_notin_cellbase = []
