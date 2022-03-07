@@ -97,7 +97,7 @@ def main():
                     extracted_exons_dict = query_cellbasedict(exon, data)
                     list_txs_dict.append(extracted_exons_dict)
                 else:
-                    print(f"exon " + str(exon['exonNumber']) + " is a non coding exon")
+                    print(f"exon  {str(exon['exonNumber'])} is a non coding exon")
 
             # combine all exons into one table for that transcript
             transcript_table = pd.DataFrame(list_txs_dict)
