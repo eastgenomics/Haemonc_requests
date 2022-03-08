@@ -116,14 +116,13 @@ def main():
     txs_dict['transcript_id'] = data['responses'][0]['results'][0]['id']
     txs_dict['exonNumber'] = 14
     flt3_df =  pd.DataFrame([txs_dict])
-    flt3_all_df = pd.concat([df,flt3_df])
-
-    flt3_all_df.to_csv("coding_unrestricted_GRCh38_myeloid_cgppindel_v2.0_new_capture_regions_only.bed", sep="\t",
-            header=False, index=False)
-
 
     df[['exon_start']] = df[['exon_start']] - 5
     df[['exon_end']] = df[['exon_end']] + 5
+    
+    flt3_all_df = pd.concat([df,flt3_df])
+    flt3_all_df.to_csv("coding_unrestricted_GRCh38_myeloid_cgppindel_v2.0_new_capture_regions_only.bed", sep="\t",
+            header=False, index=False)
 
     df.to_csv("coding_unrestricted_GRCh38_myeloid_v2.0_new_capture_regions_only.bed", sep="\t",
             header=False, index=False)
