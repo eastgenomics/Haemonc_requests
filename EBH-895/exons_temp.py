@@ -107,7 +107,7 @@ def main():
     all_exons = data['responses'][0]['results'][0]['exons']
     txs_dict = {}
     txs_dict['chr'] = 'chr' + data['responses'][0]['results'][0]['chromosome']
-    # Cellbase laways read from left to right regardless of +ve or
+    # Cellbase always read from left to right regardless of +ve or
     # -ve strand, so for the intron the start will be end of exon 15
     # and end will be start of exon 14
     txs_dict['exon_start'] = all_exons[14]['end']
@@ -119,9 +119,9 @@ def main():
 
     df[['exon_start']] = df[['exon_start']] - 5
     df[['exon_end']] = df[['exon_end']] + 5
-    
+
     flt3_all_df = pd.concat([df,flt3_df])
-    flt3_all_df.to_csv("coding_unrestricted_GRCh38_myeloid_cgppindel_v2.0_new_capture_regions_only.bed", sep="\t",
+    flt3_all_df.to_csv("coding_unrestricted_cgppindel_GRCh38_myeloid_v2.0_new_capture_regions_only.bed", sep="\t",
             header=False, index=False)
 
     df.to_csv("coding_unrestricted_GRCh38_myeloid_v2.0_new_capture_regions_only.bed", sep="\t",
