@@ -2,16 +2,14 @@
 # using the zetta url method rather than the API client as it is still
 # out of date
 import argparse
-from ast import arg
 import json
 import pandas as pd
 import urllib.request
 
 def parse_args():
-    """Parse through arguements
+    """Parse through input arguments
     Returns:
-        args: Variable that you can extract relevant
-        arguements inputs needed
+        args: Variable that you can extract relevant input arguments
     """
     # Read in arguments
     parser = argparse.ArgumentParser()
@@ -64,10 +62,9 @@ def main():
        files so it's seperate outputs makes it easier for appending files.
     """
     args = parse_args()
-    txs_file = open(args.transcript_file, "r")
-    txs_file_read = txs_file.read()
-    transcript_list = txs_file_read.split("\n")
-    transcript_list = list(filter(None, transcript_list))
+    with open (args.transcript_file, "r") as txs_file:
+        transcript_list = txs_file.read().splitlines()
+        transcript_list = list(filter(None, transcript_list))
     print(transcript_list)
     txs_file.close()
 
