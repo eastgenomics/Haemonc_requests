@@ -6,10 +6,10 @@
 
 tmp=( $(ls | sort | uniq))
 len=( $(ls | wc -l) / 4)
-mkdir annonymised_outputs
+mkdir anonymised_outputs
 for j in `seq 0 4 $len`; 
     do echo $j; 
     for ((i=$j; i<$(($j + 4)); i++)); 
-        do echo ${tmp[$i]}; scp ${tmp[$i]}  annonymised_outputs/$(echo ${tmp[$i]} | sed "s/.*EGG2_//g" | sed "s/^[^_]*_/S${j}_/g");
+        do echo ${tmp[$i]}; scp ${tmp[$i]}  anonymised_outputs/$(echo ${tmp[$i]} | sed "s/.*EGG2_//g" | sed "s/^[^_]*_/S${j}_/g");
     done;
 done
