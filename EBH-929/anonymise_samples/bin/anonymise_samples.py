@@ -41,7 +41,7 @@ def main():
 
     df2 = df.drop(df.columns[0], axis=1)
 
-    output_filename = output_path + "/" + output + ".xlsx"
+    output_filename = output_path + "/" + output + ".tsv"
 
     df2.to_csv(output_filename, sep="\t", header=True, index=False)
 
