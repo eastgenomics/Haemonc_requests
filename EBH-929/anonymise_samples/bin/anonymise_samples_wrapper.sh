@@ -12,5 +12,5 @@ for j in `seq 0 1 $len`;
     do echo ${tmp[$j]};
     random_num=${RANDOM:0:5};
     echo S$random_num;
-    python ../bin/anonymise_samples.py -f ${tmp[$j]}  -o S${random_num}_markdup_recalibrated_tnhaplotyper2_panels -p anonymised_outputs
+    python ../bin/anonymise_samples.py -f ${tmp[$j]}  -o S${random_num}_markdup_recalibrated_tnhaplotyper2_allgenes -p anonymised_outputs
 done > anonymised_outputs/log_out.txt
