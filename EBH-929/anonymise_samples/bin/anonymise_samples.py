@@ -1,6 +1,7 @@
 import argparse
 import pandas as pd
 
+
 def parse_args():
     """Reads on argument passed at the cmd line
     Returns:
@@ -25,10 +26,10 @@ def parse_args():
         help='output path name'
         )
 
-
     args = parser.parse_args()
 
     return args
+
 
 def main():
     args = parse_args()
