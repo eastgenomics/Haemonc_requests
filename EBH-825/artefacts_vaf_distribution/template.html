@@ -1,30 +1,33 @@
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css">
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/scroller/2.0.3/css/scroller.dataTables.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.bootstrap4.min.css">
+<!doctype html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css">
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/scroller/2.0.3/css/scroller.dataTables.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.bootstrap4.min.css">
 
-<script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
-<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
-<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/scroller/2.0.3/js/dataTables.scroller.min.js"></script>
-<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/plug-ins/1.10.25/features/pageResize/dataTables.pageResize.min.js"></script>
-<script type="text/javascript" src="https://cdn.plot.ly/plotly-1.42.5.min.js"></script>
+  <script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+  <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+  <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/scroller/2.0.3/js/dataTables.scroller.min.js"></script>
+  <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/plug-ins/1.10.25/features/pageResize/dataTables.pageResize.min.js"></script>
+  <script type="text/javascript" src="https://cdn.plot.ly/plotly-1.42.5.min.js"></script>
+</head>
 
-
-<div id="low_exon_plots" style="width:80%; margin:0 auto; padding-top:20px">
-<table id="low_plots_grid"  class='row-border nowrap noHover pageResize'>
-  <thead>
-    <tr>
-      <th></th>
-      <th></th>
-    </tr>
-  </thead>
-</table>
-</div>
-
+<body class="card-body border-light mt-5 mb-5 p-3 bg-light">
+  <div id="low_exon_plots" style="width:50%; margin:0 auto; padding-top:20px">
+    <table id="low_plots_grid"  class='row-border nowrap noHover pageResize'>
+      <thead>
+        <tr>
+          <th></th>
+          <th></th>
+        </tr>
+      </thead>
+    </table>
+  </div>
+</body>
 
 
 <script>
   jQuery.fn.dataTable.ext.type.search.hiddenVal = function(data) {
-
     return $('<div>').append(data).find('.hidden-val').text()
   }
   var gridview = 1;
@@ -84,7 +87,7 @@
     data: data,
     deferRender:    true,
     scrollY:        "85vh",
-    scrollX:        true,
+    scrollX:        false,
     "searching":    true,
     "lengthMenu":   [[15, 30, 60, -1], [15, 30, 60, "All"]],
     'processing':   true,
@@ -108,18 +111,18 @@
       // function to create responsive container over dataTable for adding plots to
       if(gridview == 1) {
         // create an empty plot container, put it in the dataTables_scrollBody div
-        if ($('#plot_container').length < 1) { 
-          $('.dataTables_scrollBody').append('<div id="plot_container"></div>'); 
-        } 
+        if ($('#plot_container').length < 1) {
+          $('.dataTables_scrollBody').append('<div id="plot_container"></div>');
+        }
         $('#plot_container').html('');
 
         return true;
       }
     },
-		
+
     "rowCallback": function( nRow, data, iDisplayIndex, iDisplayIndexFull ) {
       // function to add data from array into container
-      if(gridview == 1) {  
+      if(gridview == 1) {
         $('#plot_container').append(data[1]);
       }
       return nRow
@@ -129,22 +132,20 @@
       // function to generate plots on every search / refresh
       $('.sub_plot').each(function(data) {
         let div = $(this)[0];
-        
 
         // given array has title, coordinates and coverage values, split in half to seperate
         let array = [div.innerHTML][0].split(",")
-        
-        var coords = array.splice(1, Math.floor(array.length / 2));
-        var cov = array.splice(2);
+
+        var counts = array.splice(1, Math.floor(array.length / 2));
+        var vafs = array.splice(2);
         var title = array[0];
-   
 
         // build text for hover labels on data points
         var text = [];
-        coords.forEach((coord, index) => {
-          const cov_val = cov[index];
-          var coord = String(coord).replace(/\B(?=(\d{3})+(?!\d))/g, ","); // adds ',' seperator at 1000s
-          text.push("count: " + coord + "<br>VAF: " + cov_val);
+        counts.forEach((count, index) => {
+          const vaf_val = vafs[index];
+          var count = String(count)
+          text.push("count: " + count + "<br>VAF: " + vaf_val);
         });
 
         // value for threshold line
@@ -154,14 +155,11 @@
 
         // pass values to config and layout for plotly
         let t_dataConfig = dataConfig;
-        t_dataConfig[0].x = cov;
-        t_dataConfig[0].y = coords;
-        /* t_dataConfig[0].line.color = color */;
+        t_dataConfig[0].x = vafs;
+        t_dataConfig[0].y = counts;
         t_dataConfig[0].text = text;
-        layout.shapes[0].y0 = threshold;
-        layout.shapes[0].y1 = threshold;
+
         layout.title = title;
-        /* layout.yaxis.tickvals = intervals */;
 
         while(div.firstChild) { div.removeChild(div.firstChild); }
         // call plotly to generate plot
