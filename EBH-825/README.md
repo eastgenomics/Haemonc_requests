@@ -11,6 +11,3 @@ File containing variants on all cases sequenced so far for easy identification o
 ### artefacts_vaf_distribution
 Mean/median/SD for the VAF of variant(s) and as a distribution plot.
 The following scripts are in the directory:
-- merge_vcfs.py (merged all annotated vcf into a single combined tsv)
-- make_plot_data.ipynb (transforms the combined tsv for plotting)
-- template.html (template for the plots)
