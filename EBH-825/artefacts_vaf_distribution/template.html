@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css">
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/scroller/2.0.3/css/scroller.dataTables.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.bootstrap4.min.css">
+
+  <script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+  <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+  <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/scroller/2.0.3/js/dataTables.scroller.min.js"></script>
+  <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/plug-ins/1.10.25/features/pageResize/dataTables.pageResize.min.js"></script>
+  <script type="text/javascript" src="https://cdn.plot.ly/plotly-1.42.5.min.js"></script>
+</head>
+
+<body class="card-body border-light mt-5 mb-5 p-3 bg-light">
+  <div id="low_exon_plots" style="width:50%; margin:0 auto; padding-top:20px">
+    <table id="low_plots_grid"  class='row-border nowrap noHover pageResize'>
+      <thead>
+        <tr>
+          <th></th>
+          <th></th>
+        </tr>
+      </thead>
+    </table>
+  </div>
+</body>
+
+
+<script>
+  jQuery.fn.dataTable.ext.type.search.hiddenVal = function(data) {
+    return $('<div>').append(data).find('.hidden-val').text()
+  }
+  var gridview = 1;
+
+  $(document).ready( function () {
+  // data passed in as an array of arrays as [[title, plot_data]...]
+  var data = $DATA_ARRAY;
+
+  // plotly layout properties
+  let layout = {
+    hovermode:'closest',
+    title: "",
+    showlegend: false,
+    plot_bgcolor: '#f7fbfd',
+    shapes: [{
+      // threshold line
+      type: 'line',
+      xref: 'paper',
+      x0: 0,
+      y0: '',
+      x1: 1,
+      y1: '',
+      line:{
+        color: 'rgb(255, 0, 0)',
+        width: 1
+      }
+  	}],
+    xaxis: {
+    	title: "vaf",
+    	range: [0, 1],
+      showgrid: false,
+      showline: false,
+      showticklabels: true,
+    },
+    yaxis: {
+      title: "count",
+      rangemode: "tozero",
+      tickmode: "array",
+      tickvals: ""
+      }
+  };
+
+  // config for plotly to pass data to
+  let dataConfig = [{
+    type: "scatter",
+    mode: "markers",
+    x: [],
+    y: [],
+    text:'text',
+    hoverinfo: 'text',
+    marker: {
+      size: 5
+    }
+  }];
+
+  var table = $('#low_plots_grid').DataTable({
+    data: data,
+    deferRender:    true,
+    scrollY:        "85vh",
+    scrollX:        false,
+    "searching":    true,
+    "lengthMenu":   [[15, 30, 60, -1], [15, 30, 60, "All"]],
+    'processing':   true,
+    'language': {
+      'processing': 'Loading...'
+    },
+    "columnDefs": [
+      {
+        "targets": [ 0 ],
+        "visible": false,
+        "searchable": true
+      },
+      {
+        "targets": [ 1 ],
+        "visible": false,
+        "searchable": true
+      },
+    ],
+
+    "preDrawCallback": function (oSettings) {
+      // function to create responsive container over dataTable for adding plots to
+      if(gridview == 1) {
+        // create an empty plot container, put it in the dataTables_scrollBody div
+        if ($('#plot_container').length < 1) {
+          $('.dataTables_scrollBody').append('<div id="plot_container"></div>');
+        }
+        $('#plot_container').html('');
+
+        return true;
+      }
+    },
+
+    "rowCallback": function( nRow, data, iDisplayIndex, iDisplayIndexFull ) {
+      // function to add data from array into container
+      if(gridview == 1) {
+        $('#plot_container').append(data[1]);
+      }
+      return nRow
+    },
+
+    "drawCallback": function (oSettings, data) {
+      // function to generate plots on every search / refresh
+      $('.sub_plot').each(function(data) {
+        let div = $(this)[0];
+
+        // given array has title, coordinates and coverage values, split in half to seperate
+        let array = [div.innerHTML][0].split(",")
+
+        var counts = array.splice(1, Math.floor(array.length / 2));
+        var vafs = array.splice(2);
+        var title = array[0];
+
+        // build text for hover labels on data points
+        var text = [];
+        counts.forEach((count, index) => {
+          const vaf_val = vafs[index];
+          var count = String(count)
+          text.push("count: " + count + "<br>VAF: " + vaf_val);
+        });
+
+        // value for threshold line
+        var threshold = '$threshold';
+        threshold = parseInt(threshold.slice(0, -1)); // remove x from end
+
+
+        // pass values to config and layout for plotly
+        let t_dataConfig = dataConfig;
+        t_dataConfig[0].x = vafs;
+        t_dataConfig[0].y = counts;
+        t_dataConfig[0].text = text;
+
+        layout.title = title;
+
+        while(div.firstChild) { div.removeChild(div.firstChild); }
+        // call plotly to generate plot
+        Plotly.react(
+          div,
+          t_dataConfig,
+          layout,
+          {
+            displaylogo: false,
+            modeBarButtonsToRemove: [
+              'hoverClosestCartesian', 'hoverCompareCartesian', 'toggleSpikelines'
+            ]
+          }
+        );
+      });
+    }
+  });
+  });
+</script>
