@@ -7,7 +7,10 @@ There is a chance that the data produced from these scripts will be need to be r
 
 File containing variants on all cases sequenced so far for easy identification of historic cases where we have assigned a certain pathogenicity but have determined on a more recent case that this needs to be different and needs to be changed on the clinical report.
 
+
 ### artefacts_vaf_distribution
-
 Mean/median/SD for the VAF of variant(s) and as a histogram distribution plot.
-
+The following scripts are in the directory:
+- merge_vcfs.py (merged all annotated vcf into a single combined tsv)
+- make_plot_data.ipynb (transforms the combined tsv for plotting)
+- template.html (template for the plots)
