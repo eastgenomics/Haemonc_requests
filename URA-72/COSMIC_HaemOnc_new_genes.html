@@ -356,10 +356,10 @@ library(&quot;stringr&quot;)        </code></pre>
 <p>From COSMIC, the file from “COSMIC Mutation Data” (<a href="https://cancer.sanger.ac.uk/cosmic/download" class="uri">https://cancer.sanger.ac.uk/cosmic/download</a>) was filtered for cancer “haematopoietic_and_lymphoid_tissue” and downloaded.</p>
 <p>The aim of this analysis is to see whether the mane transcripts retain more of the variants in cosmic than the altervatives transcripts of a gene. There are a number of ways to track a COSMIC variants, either genomic position, Genomic mutation identifier (COSV) or Legacy mutation identifier (COSM). For this analysis, the Genomic mutation identifier (COSV) will filtered for anything not null then the Legacy mutation identifier (COSM) will be filtered for coding ID (there are COSN which is non coding).</p>
 <p>COSMIC is based off ENSEMBL transcripts and not all ensembl transcripts can be easily mapped to RefSeq transcripts which is what we use. So this analysis will only be looking at the ENSEMBL but their respective RefSeq transcripts will be noted to make this analysis more clear for us. The Refseq and ENSEMBL transcripts were mapped using CCDS (e.g <a href="https://www.ncbi.nlm.nih.gov/projects/CCDS/CcdsBrowse.cgi?REQUEST=ALLFIELDS&amp;DATA=CXCR4&amp;ORGANISM=0&amp;BUILDS=CURRENTBUILDS" class="uri">https://www.ncbi.nlm.nih.gov/projects/CCDS/CcdsBrowse.cgi?REQUEST=ALLFIELDS&amp;DATA=CXCR4&amp;ORGANISM=0&amp;BUILDS=CURRENTBUILDS</a>).</p>
-<pre class="r"><code>setwd(&quot;~/Documents/Projects/myeloid/haemonc_smalltasks/bin/Haemonc_requests&quot;)
+<pre class="r"><code>setwd(&quot;~/Documents/Projects/myeloid/capture_design/annotation_sources/&quot;)
 
 # This table is filtered for the cancer &quot;haematopoietic_and_lymphoid_tissue&#39;
-dat &lt;- read.table(&quot;~/Documents/Projects/myeloid/capture_design/annotation_sources/cosmic/V95_38_MUTANT.csv&quot;, header = T, stringsAsFactors = F, sep = &quot;,&quot;)
+dat &lt;- read.table(&quot;cosmic/V95_38_MUTANT.csv&quot;, header = T, stringsAsFactors = F, sep = &quot;,&quot;)
 dat &lt;- dat %&gt;% 
             separate(GENE_NAME,  c(&quot;Gene&quot;, &quot;Transcript&quot;), &quot;_&quot;)</code></pre>
 <pre><code>## Warning: Expected 2 pieces. Missing pieces filled with `NA` in 1161432 rows [49,
@@ -367,7 +367,12 @@ dat &lt;- dat %&gt;%
 ## 171, 172, 182, ...].</code></pre>
 <pre class="r"><code>new_genes &lt;- c(&quot;IRF4&quot;, &quot;CARD11&quot;, &quot;UBA1&quot;, &quot;ANKRD26&quot;, &quot;BCL2&quot;, &quot;ARID1A&quot;, &quot;MEF2B&quot;, &quot;BTK&quot;, &quot;DIS3&quot;, &quot;CXCR4&quot;, &quot;RHOA&quot;)
 
-old_genes &lt;- c(&quot;BCORL1&quot;, &quot;CUX1&quot;, &quot;FBXW7&quot;, &quot;GNAS&quot;, &quot;KRAS&quot; )</code></pre>
+old_genes_not_MANE &lt;- c(&quot;BCORL1&quot;, &quot;CUX1&quot;, &quot;FBXW7&quot;, &quot;GNAS&quot;, &quot;KRAS&quot; )
+
+old_genes_MANE &lt;- c(&#39;ASXL1&#39;,    &#39;ATM&#39;,  &#39;BCOR&#39;, &#39;BIRC3&#39;,    &#39;BRAF&#39;, &#39;CALR&#39;, &#39;CBL&#39;,  &#39;CEBPA&#39;,    &#39;CREBBP&#39;,   &#39;CSF3R&#39;,    &#39;DDX41&#39;,    &#39;DNMT3A&#39;,   &#39;EP300&#39;,    &#39;ETNK1&#39;,    &#39;ETV6&#39;, &#39;EZH2&#39;, &#39;FLT3&#39;, &#39;GATA1&#39;,    &#39;GATA2&#39;,    &#39;GNB1&#39;, &#39;HRAS&#39;, &#39;IDH1&#39;, &#39;IDH2&#39;, &#39;IKZF1&#39;,    &#39;JAK1&#39;, &#39;JAK2&#39;, &#39;KIT&#39;,  &#39;KMT2A&#39;,    &#39;KMT2C&#39;,    &#39;MPL&#39;,  &#39;MYD88&#39;,    &#39;NF1&#39;,  &#39;NFE2&#39;, &#39;NOTCH1&#39;,   &#39;NPM1&#39;, &#39;NRAS&#39;, &#39;PAX5&#39;, &#39;PHF6&#39;, &#39;PPM1D&#39;,    &#39;PTEN&#39;, &#39;PTPN11&#39;,   &#39;RAD21&#39;,    &#39;RUNX1&#39;,    &#39;SETBP1&#39;,   &#39;SF3B1&#39;,    &#39;SH2B3&#39;,    &#39;SRSF2&#39;,    &#39;STAG2&#39;,    &#39;STAT3&#39;,    &#39;STAT5B&#39;,   &#39;TET2&#39;, &#39;TP53&#39;, &#39;U2AF1&#39;,    &#39;WT1&#39;,  &#39;ZRSR2&#39;)
+
+old_genes_missing_one_mane &lt;- c(&#39;BRAF&#39;, &#39;HRAS&#39;)
+summary_tbl &lt;- c()</code></pre>
 <div id="new-genes" class="section level2">
 <h2>New genes</h2>
 <pre class="r"><code>for (gene in new_genes){
@@ -381,11 +386,17 @@ old_genes &lt;- c(&quot;BCORL1&quot;, &quot;CUX1&quot;, &quot;FBXW7&quot;, &quot
   txs = paste(unique(df$ACCESSION_NUMBER))
   # sometimes there are null COSVs which have COSM values but these dont have clear AA annotation
   # so these can be removed
-  total_COSMs &lt;- unique(df[which(df$GENOMIC_MUTATION_ID != &quot;null&quot;), &quot;LEGACY_MUTATION_ID&quot;])
+  total_COSMs &lt;- unique(df[which(df$GENOMIC_MUTATION_ID != &quot;null&quot; &amp;  df$MUTATION_DESCRIPTION != &quot;Unknown&quot;), &quot;LEGACY_MUTATION_ID&quot;])
   print(paste(&quot;Total COSMs for this gene is: &quot;, length(total_COSMs), sep = &quot; &quot;))
-  for (i in txs){
-    print(paste(i, length(unique(df[which(df$ACCESSION_NUMBER %in% i &amp; df$GENOMIC_MUTATION_ID != &quot;null&quot;), &quot;LEGACY_MUTATION_ID&quot;]))), sep = &quot;_&quot;)
+  for (i in 1:length(txs)){
+    transcripts = txs[i]
+    
+    print(paste(transcripts, length(unique(df[which(df$ACCESSION_NUMBER %in% transcripts &amp; df$GENOMIC_MUTATION_ID != &quot;null&quot; &amp;  df$MUTATION_DESCRIPTION != &quot;Unknown&quot;), &quot;LEGACY_MUTATION_ID&quot;]))), sep = &quot;_&quot;)
+    
+    row &lt;- c(gene, transcripts, length(unique(df[which(df$ACCESSION_NUMBER %in% transcripts &amp; df$GENOMIC_MUTATION_ID != &quot;null&quot; &amp;  df$MUTATION_DESCRIPTION != &quot;Unknown&quot;), &quot;LEGACY_MUTATION_ID&quot;])))
+    summary_tbl &lt;- rbind(summary_tbl, row)
   }
+  
   print(&quot;-----------------------------&quot;)
 }</code></pre>
 <pre><code>## [1] &quot;IRF4&quot;
@@ -395,78 +406,78 @@ old_genes &lt;- c(&quot;BCORL1&quot;, &quot;CUX1&quot;, &quot;FBXW7&quot;, &quot
 ## [1] &quot;-----------------------------&quot;
 ## [1] &quot;CARD11&quot;
 ## [1] &quot;The Ensemble transcripts for CARD11  is: ENST00000396946.8&quot;
-## [1] &quot;Total COSMs for this gene is:  210&quot;
-## [1] &quot;ENST00000396946.8 210&quot;
+## [1] &quot;Total COSMs for this gene is:  203&quot;
+## [1] &quot;ENST00000396946.8 203&quot;
 ## [1] &quot;-----------------------------&quot;
 ## [1] &quot;UBA1&quot;
 ## [1] &quot;The Ensemble transcripts for UBA1  is: ENST00000377269.3 &amp; ENST00000335972.10 &amp; ENST00000377351.8&quot;
-## [1] &quot;Total COSMs for this gene is:  14&quot;
-## [1] &quot;ENST00000377269.3 6&quot;
-## [1] &quot;ENST00000335972.10 14&quot;
-## [1] &quot;ENST00000377351.8 14&quot;
+## [1] &quot;Total COSMs for this gene is:  13&quot;
+## [1] &quot;ENST00000377269.3 5&quot;
+## [1] &quot;ENST00000335972.10 11&quot;
+## [1] &quot;ENST00000377351.8 11&quot;
 ## [1] &quot;-----------------------------&quot;
 ## [1] &quot;ANKRD26&quot;
 ## [1] &quot;The Ensemble transcripts for ANKRD26  is: ENST00000376087.4 &amp; ENST00000436985.6&quot;
-## [1] &quot;Total COSMs for this gene is:  14&quot;
-## [1] &quot;ENST00000376087.4 14&quot;
-## [1] &quot;ENST00000436985.6 14&quot;
+## [1] &quot;Total COSMs for this gene is:  13&quot;
+## [1] &quot;ENST00000376087.4 13&quot;
+## [1] &quot;ENST00000436985.6 13&quot;
 ## [1] &quot;-----------------------------&quot;
 ## [1] &quot;BCL2&quot;
 ## [1] &quot;The Ensemble transcripts for BCL2  is: ENST00000398117.1 &amp; ENST00000589955.2 &amp; ENST00000333681.4&quot;
 ## [1] &quot;Total COSMs for this gene is:  414&quot;
-## [1] &quot;ENST00000398117.1 414&quot;
+## [1] &quot;ENST00000398117.1 382&quot;
 ## [1] &quot;ENST00000589955.2 412&quot;
-## [1] &quot;ENST00000333681.4 414&quot;
+## [1] &quot;ENST00000333681.4 382&quot;
 ## [1] &quot;-----------------------------&quot;
 ## [1] &quot;ARID1A&quot;
 ## [1] &quot;The Ensemble transcripts for ARID1A  is: ENST00000615191.4 &amp; ENST00000457599.6 &amp; ENST00000430799.7 &amp; ENST00000324856.12 &amp; ENST00000374152.7&quot;
-## [1] &quot;Total COSMs for this gene is:  234&quot;
-## [1] &quot;ENST00000615191.4 97&quot;
-## [1] &quot;ENST00000457599.6 234&quot;
-## [1] &quot;ENST00000430799.7 234&quot;
-## [1] &quot;ENST00000324856.12 234&quot;
-## [1] &quot;ENST00000374152.7 177&quot;
+## [1] &quot;Total COSMs for this gene is:  221&quot;
+## [1] &quot;ENST00000615191.4 85&quot;
+## [1] &quot;ENST00000457599.6 199&quot;
+## [1] &quot;ENST00000430799.7 164&quot;
+## [1] &quot;ENST00000324856.12 221&quot;
+## [1] &quot;ENST00000374152.7 164&quot;
 ## [1] &quot;-----------------------------&quot;
 ## [1] &quot;MEF2B&quot;
 ## [1] &quot;The Ensemble transcripts for MEF2B  is: ENST00000410050.5 &amp; ENST00000424583.6 &amp; ENST00000409447.2 &amp; ENST00000409224.5&quot;
-## [1] &quot;Total COSMs for this gene is:  88&quot;
-## [1] &quot;ENST00000410050.5 88&quot;
-## [1] &quot;ENST00000424583.6 88&quot;
-## [1] &quot;ENST00000409447.2 88&quot;
-## [1] &quot;ENST00000409224.5 88&quot;
+## [1] &quot;Total COSMs for this gene is:  80&quot;
+## [1] &quot;ENST00000410050.5 77&quot;
+## [1] &quot;ENST00000424583.6 77&quot;
+## [1] &quot;ENST00000409447.2 66&quot;
+## [1] &quot;ENST00000409224.5 71&quot;
 ## [1] &quot;-----------------------------&quot;
 ## [1] &quot;BTK&quot;
 ## [1] &quot;The Ensemble transcripts for BTK  is: ENST00000621635.4 &amp; ENST00000618050.4 &amp; ENST00000372880.5 &amp; ENST00000308731.7&quot;
-## [1] &quot;Total COSMs for this gene is:  40&quot;
-## [1] &quot;ENST00000621635.4 40&quot;
-## [1] &quot;ENST00000618050.4 40&quot;
-## [1] &quot;ENST00000372880.5 40&quot;
-## [1] &quot;ENST00000308731.7 40&quot;
+## [1] &quot;Total COSMs for this gene is:  33&quot;
+## [1] &quot;ENST00000621635.4 33&quot;
+## [1] &quot;ENST00000618050.4 29&quot;
+## [1] &quot;ENST00000372880.5 20&quot;
+## [1] &quot;ENST00000308731.7 33&quot;
 ## [1] &quot;-----------------------------&quot;
 ## [1] &quot;DIS3&quot;
 ## [1] &quot;The Ensemble transcripts for DIS3  is: ENST00000545453.5 &amp; ENST00000377767.8 &amp; ENST00000377780.8&quot;
-## [1] &quot;Total COSMs for this gene is:  47&quot;
-## [1] &quot;ENST00000545453.5 46&quot;
-## [1] &quot;ENST00000377767.8 47&quot;
-## [1] &quot;ENST00000377780.8 46&quot;
+## [1] &quot;Total COSMs for this gene is:  46&quot;
+## [1] &quot;ENST00000545453.5 38&quot;
+## [1] &quot;ENST00000377767.8 46&quot;
+## [1] &quot;ENST00000377780.8 40&quot;
 ## [1] &quot;-----------------------------&quot;
 ## [1] &quot;CXCR4&quot;
 ## [1] &quot;The Ensemble transcripts for CXCR4  is: ENST00000409817.1 &amp; ENST00000241393.3&quot;
-## [1] &quot;Total COSMs for this gene is:  93&quot;
-## [1] &quot;ENST00000409817.1 86&quot;
-## [1] &quot;ENST00000241393.3 93&quot;
+## [1] &quot;Total COSMs for this gene is:  89&quot;
+## [1] &quot;ENST00000409817.1 85&quot;
+## [1] &quot;ENST00000241393.3 87&quot;
 ## [1] &quot;-----------------------------&quot;
 ## [1] &quot;RHOA&quot;
 ## [1] &quot;The Ensemble transcripts for RHOA  is: ENST00000418115.5 &amp; ENST00000422781.5 &amp; ENST00000454011.6&quot;
 ## [1] &quot;Total COSMs for this gene is:  59&quot;
 ## [1] &quot;ENST00000418115.5 59&quot;
-## [1] &quot;ENST00000422781.5 59&quot;
-## [1] &quot;ENST00000454011.6 59&quot;
+## [1] &quot;ENST00000422781.5 55&quot;
+## [1] &quot;ENST00000454011.6 39&quot;
 ## [1] &quot;-----------------------------&quot;</code></pre>
 </div>
-<div id="old-genes" class="section level2">
-<h2>Old genes</h2>
-<pre class="r"><code>for (gene in old_genes){
+<div id="braf-hras" class="section level2">
+<h2>BRAF &amp; HRAS</h2>
+<pre class="r"><code>for (gene in old_genes_missing_one_mane){
   print(gene)
   df &lt;- dat[which(dat$Gene == gene),]
   # grep COSMIC legacy mutation IDs that are coding by selecting those that start with COSM
@@ -477,131 +488,99 @@ old_genes &lt;- c(&quot;BCORL1&quot;, &quot;CUX1&quot;, &quot;FBXW7&quot;, &quot
   txs = paste(unique(df$ACCESSION_NUMBER))
   # sometimes there are null COSVs which have COSM values but these dont have clear AA annotation
   # so these can be removed
-  total_COSMs &lt;- unique(df[which(df$GENOMIC_MUTATION_ID != &quot;null&quot;), &quot;LEGACY_MUTATION_ID&quot;])
+  total_COSMs &lt;- unique(df[which(df$GENOMIC_MUTATION_ID != &quot;null&quot; &amp; df$MUTATION_DESCRIPTION != &quot;Unknown&quot;), &quot;LEGACY_MUTATION_ID&quot;])
   print(paste(&quot;Total COSMs for this gene is: &quot;, length(total_COSMs), sep = &quot; &quot;))
-  for (i in txs){
-    print(paste(i, length(unique(df[which(df$ACCESSION_NUMBER %in% i &amp; df$GENOMIC_MUTATION_ID != &quot;null&quot;), &quot;LEGACY_MUTATION_ID&quot;]))), sep = &quot;_&quot;)
+  for (i in 1:length(txs)){
+    transcripts = txs[i]
+    
+    print(paste(transcripts, length(unique(df[which(df$ACCESSION_NUMBER %in% transcripts &amp; df$GENOMIC_MUTATION_ID != &quot;null&quot; &amp; df$MUTATION_DESCRIPTION != &quot;Unknown&quot;), &quot;LEGACY_MUTATION_ID&quot;]))), sep = &quot;_&quot;)
+    
+    row &lt;- c(gene, transcripts, length(unique(df[which(df$ACCESSION_NUMBER %in% transcripts &amp; df$GENOMIC_MUTATION_ID != &quot;null&quot; &amp; df$MUTATION_DESCRIPTION != &quot;Unknown&quot;), &quot;LEGACY_MUTATION_ID&quot;])))
+    summary_tbl &lt;- rbind(summary_tbl, row)
+  }
+  print(&quot;-----------------------------&quot;)
+}</code></pre>
+<pre><code>## [1] &quot;BRAF&quot;
+## [1] &quot;The Ensemble transcripts for BRAF  is: ENST00000288602.11 &amp; ENST00000644969.1 &amp; ENST00000646891.1 &amp; ENST00000496384.7 &amp; ENST00000469930.2&quot;
+## [1] &quot;Total COSMs for this gene is:  64&quot;
+## [1] &quot;ENST00000288602.11 64&quot;
+## [1] &quot;ENST00000644969.1 63&quot;
+## [1] &quot;ENST00000646891.1 64&quot;
+## [1] &quot;ENST00000496384.7 63&quot;
+## [1] &quot;ENST00000469930.2 6&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;HRAS&quot;
+## [1] &quot;The Ensemble transcripts for HRAS  is: ENST00000397596.6 &amp; ENST00000451590.5 &amp; ENST00000397594.5 &amp; ENST00000311189.7 &amp; ENST00000417302.5&quot;
+## [1] &quot;Total COSMs for this gene is:  14&quot;
+## [1] &quot;ENST00000397596.6 14&quot;
+## [1] &quot;ENST00000451590.5 14&quot;
+## [1] &quot;ENST00000397594.5 12&quot;
+## [1] &quot;ENST00000311189.7 14&quot;
+## [1] &quot;ENST00000417302.5 12&quot;
+## [1] &quot;-----------------------------&quot;</code></pre>
+</div>
+<div id="old-genes-not-mane" class="section level2">
+<h2>Old genes not MANE</h2>
+<pre class="r"><code>for (gene in old_genes_not_MANE){
+  print(gene)
+  df &lt;- dat[which(dat$Gene == gene),]
+  # grep COSMIC legacy mutation IDs that are coding by selecting those that start with COSM
+  # COSN is non coding
+  df &lt;- df[str_detect(df$LEGACY_MUTATION_ID, &quot;COSM&quot;), ]
+  print(paste(&quot;The Ensemble transcripts for&quot;, gene, &quot; is:&quot;, paste(unique(df$ACCESSION_NUMBER), collapse =  &quot; &amp; &quot;), collapse = &quot;&quot;))
+
+  txs = paste(unique(df$ACCESSION_NUMBER))
+  total_COSMs &lt;- unique(df[which(df$GENOMIC_MUTATION_ID != &quot;null&quot; &amp;  df$MUTATION_DESCRIPTION != &quot;Unknown&quot;), &quot;LEGACY_MUTATION_ID&quot;])
+  print(paste(&quot;Total COSMs for this gene is: &quot;, length(total_COSMs), sep = &quot; &quot;))
+  for (i in 1:length(txs)){
+    transcripts = txs[i]
+    
+    print(paste(transcripts, length(unique(df[which(df$ACCESSION_NUMBER %in% transcripts &amp; df$GENOMIC_MUTATION_ID != &quot;null&quot; &amp;  df$MUTATION_DESCRIPTION != &quot;Unknown&quot;), &quot;LEGACY_MUTATION_ID&quot;]))), sep = &quot;_&quot;)
+    
+    row &lt;- c(gene, transcripts, length(unique(df[which(df$ACCESSION_NUMBER %in% transcripts &amp; df$GENOMIC_MUTATION_ID != &quot;null&quot; &amp;  df$MUTATION_DESCRIPTION != &quot;Unknown&quot;), &quot;LEGACY_MUTATION_ID&quot;])))
+    summary_tbl &lt;- rbind(summary_tbl, row)
   }
   print(&quot;-----------------------------&quot;)
 }</code></pre>
 <pre><code>## [1] &quot;BCORL1&quot;
 ## [1] &quot;The Ensemble transcripts for BCORL1  is: ENST00000540052.5 &amp; ENST00000218147.11&quot;
-## [1] &quot;Total COSMs for this gene is:  117&quot;
-## [1] &quot;ENST00000540052.5 117&quot;
-## [1] &quot;ENST00000218147.11 117&quot;
+## [1] &quot;Total COSMs for this gene is:  113&quot;
+## [1] &quot;ENST00000540052.5 113&quot;
+## [1] &quot;ENST00000218147.11 113&quot;
 ## [1] &quot;-----------------------------&quot;
 ## [1] &quot;CUX1&quot;
 ## [1] &quot;The Ensemble transcripts for CUX1  is: ENST00000292535.11 &amp; ENST00000550008.6 &amp; ENST00000549414.6 &amp; ENST00000360264.7 &amp; ENST00000547394.6 &amp; ENST00000645010.1 &amp; ENST00000393824.7 &amp; ENST00000546411.7 &amp; ENST00000622516.5 &amp; ENST00000556210.1 &amp; ENST00000646649.1 &amp; ENST00000425244.6 &amp; ENST00000292538.9 &amp; ENST00000437600.9&quot;
-## [1] &quot;Total COSMs for this gene is:  88&quot;
-## [1] &quot;ENST00000292535.11 77&quot;
-## [1] &quot;ENST00000550008.6 77&quot;
-## [1] &quot;ENST00000549414.6 77&quot;
-## [1] &quot;ENST00000360264.7 79&quot;
-## [1] &quot;ENST00000547394.6 88&quot;
-## [1] &quot;ENST00000645010.1 79&quot;
-## [1] &quot;ENST00000393824.7 88&quot;
-## [1] &quot;ENST00000546411.7 77&quot;
-## [1] &quot;ENST00000622516.5 88&quot;
-## [1] &quot;ENST00000556210.1 77&quot;
-## [1] &quot;ENST00000646649.1 79&quot;
-## [1] &quot;ENST00000425244.6 88&quot;
-## [1] &quot;ENST00000292538.9 88&quot;
-## [1] &quot;ENST00000437600.9 88&quot;
+## [1] &quot;Total COSMs for this gene is:  80&quot;
+## [1] &quot;ENST00000292535.11 71&quot;
+## [1] &quot;ENST00000550008.6 68&quot;
+## [1] &quot;ENST00000549414.6 69&quot;
+## [1] &quot;ENST00000360264.7 72&quot;
+## [1] &quot;ENST00000547394.6 26&quot;
+## [1] &quot;ENST00000645010.1 69&quot;
+## [1] &quot;ENST00000393824.7 26&quot;
+## [1] &quot;ENST00000546411.7 71&quot;
+## [1] &quot;ENST00000622516.5 27&quot;
+## [1] &quot;ENST00000556210.1 63&quot;
+## [1] &quot;ENST00000646649.1 64&quot;
+## [1] &quot;ENST00000425244.6 24&quot;
+## [1] &quot;ENST00000292538.9 27&quot;
+## [1] &quot;ENST00000437600.9 27&quot;
 ## [1] &quot;-----------------------------&quot;
 ## [1] &quot;FBXW7&quot;
 ## [1] &quot;The Ensemble transcripts for FBXW7  is: ENST00000603548.6 &amp; ENST00000263981.9 &amp; ENST00000296555.10 &amp; ENST00000603841.1 &amp; ENST00000604872.6 &amp; ENST00000281708.9 &amp; ENST00000393956.8&quot;
-## [1] &quot;Total COSMs for this gene is:  126&quot;
-## [1] &quot;ENST00000603548.6 126&quot;
-## [1] &quot;ENST00000263981.9 117&quot;
-## [1] &quot;ENST00000296555.10 117&quot;
-## [1] &quot;ENST00000603841.1 126&quot;
+## [1] &quot;Total COSMs for this gene is:  123&quot;
+## [1] &quot;ENST00000603548.6 122&quot;
+## [1] &quot;ENST00000263981.9 114&quot;
+## [1] &quot;ENST00000296555.10 114&quot;
+## [1] &quot;ENST00000603841.1 122&quot;
 ## [1] &quot;ENST00000604872.6 9&quot;
-## [1] &quot;ENST00000281708.9 126&quot;
-## [1] &quot;ENST00000393956.8 117&quot;
+## [1] &quot;ENST00000281708.9 122&quot;
+## [1] &quot;ENST00000393956.8 114&quot;
 ## [1] &quot;-----------------------------&quot;
 ## [1] &quot;GNAS&quot;
 ## [1] &quot;The Ensemble transcripts for GNAS  is: ENST00000371098.6 &amp; ENST00000371095.7 &amp; ENST00000354359.11 &amp; ENST00000371085.7 &amp; ENST00000306090.11 &amp; ENST00000371081.5 &amp; ENST00000371102.8 &amp; ENST00000371099.6 &amp; ENST00000371075.7 &amp; ENST00000306120.3 &amp; ENST00000371100.8 &amp; ENST00000265620.11 &amp; ENST00000313949.11&quot;
 ## [1] &quot;Total COSMs for this gene is:  61&quot;
-## [1] &quot;ENST00000371098.6 44&quot;
-## [1] &quot;ENST00000371095.7 18&quot;
-## [1] &quot;ENST00000354359.11 18&quot;
-## [1] &quot;ENST00000371085.7 18&quot;
-## [1] &quot;ENST00000306090.11 18&quot;
-## [1] &quot;ENST00000371081.5 1&quot;
-## [1] &quot;ENST00000371102.8 51&quot;
-## [1] &quot;ENST00000371099.6 33&quot;
-## [1] &quot;ENST00000371075.7 61&quot;
-## [1] &quot;ENST00000306120.3 31&quot;
-## [1] &quot;ENST00000371100.8 51&quot;
-## [1] &quot;ENST00000265620.11 18&quot;
-## [1] &quot;ENST00000313949.11 61&quot;
-## [1] &quot;-----------------------------&quot;
-## [1] &quot;KRAS&quot;
-## [1] &quot;The Ensemble transcripts for KRAS  is: ENST00000556131.1 &amp; ENST00000256078.8 &amp; ENST00000557334.5 &amp; ENST00000311936.7&quot;
-## [1] &quot;Total COSMs for this gene is:  101&quot;
-## [1] &quot;ENST00000556131.1 49&quot;
-## [1] &quot;ENST00000256078.8 101&quot;
-## [1] &quot;ENST00000557334.5 101&quot;
-## [1] &quot;ENST00000311936.7 101&quot;
-## [1] &quot;-----------------------------&quot;</code></pre>
-</div>
-<div id="output-gnas" class="section level2">
-<h2>Output GNAS</h2>
-<pre class="r"><code># save outputs
-# filter for gene
-GNAS &lt;- dat[which(dat$Gene == &quot;GNAS&quot;),]
-GNAS &lt;- GNAS[str_detect(GNAS$LEGACY_MUTATION_ID, &quot;COSM&quot;), ]
-write.table(GNAS, &quot;GNAS_coding.tsv&quot;, sep = &quot;\t&quot;,row.names=FALSE)
-
-
-# let&#39;s save each transcript per page
-library(openxlsx)
-xlsx_list &lt;- list()
-sheet &lt;- list(&quot;GNAS&quot; = GNAS)
-xlsx_list &lt;- c(xlsx_list, sheet)
-txs = paste(unique(GNAS$ACCESSION_NUMBER))
-for (i in txs){
-  # one for duplicates and another withou?
-  print(i)
-  txs_df &lt;- GNAS[which(GNAS$ACCESSION_NUMBER %in% i),]
-  sheet &lt;- list(i = txs_df)
-  xlsx_list &lt;- c(xlsx_list, sheet)
-}</code></pre>
-<pre><code>## [1] &quot;ENST00000371098.6&quot;
-## [1] &quot;ENST00000371095.7&quot;
-## [1] &quot;ENST00000354359.11&quot;
-## [1] &quot;ENST00000371085.7&quot;
-## [1] &quot;ENST00000306090.11&quot;
-## [1] &quot;ENST00000371081.5&quot;
-## [1] &quot;ENST00000371102.8&quot;
-## [1] &quot;ENST00000371099.6&quot;
-## [1] &quot;ENST00000371075.7&quot;
-## [1] &quot;ENST00000306120.3&quot;
-## [1] &quot;ENST00000371100.8&quot;
-## [1] &quot;ENST00000265620.11&quot;
-## [1] &quot;ENST00000313949.11&quot;</code></pre>
-<pre class="r"><code>names(xlsx_list) &lt;- c(&quot;GNAS&quot;, txs)
-write.xlsx(xlsx_list, file = &quot;GNAS_per_transcript.xlsx&quot;)</code></pre>
-</div>
-<div id="gnas-cosms-and-mutation-not-unknown" class="section level2">
-<h2>GNAS COSMs and Mutation not unknown</h2>
-<pre class="r"><code>gene = &quot;GNAS&quot;
-print(gene)</code></pre>
-<pre><code>## [1] &quot;GNAS&quot;</code></pre>
-<pre class="r"><code>df &lt;- dat[which(dat$Gene == gene),]
-# grep COSMIC legacy mutation IDs that are coding by selecting those that start with COSM
-# COSN is non coding
-df &lt;- df[str_detect(df$LEGACY_MUTATION_ID, &quot;COSM&quot;), ]
-print(paste(&quot;The Ensemble transcripts for&quot;, gene, &quot; is:&quot;, paste(unique(df$ACCESSION_NUMBER), collapse =  &quot; &amp; &quot;), collapse = &quot;&quot;))</code></pre>
-<pre><code>## [1] &quot;The Ensemble transcripts for GNAS  is: ENST00000371098.6 &amp; ENST00000371095.7 &amp; ENST00000354359.11 &amp; ENST00000371085.7 &amp; ENST00000306090.11 &amp; ENST00000371081.5 &amp; ENST00000371102.8 &amp; ENST00000371099.6 &amp; ENST00000371075.7 &amp; ENST00000306120.3 &amp; ENST00000371100.8 &amp; ENST00000265620.11 &amp; ENST00000313949.11&quot;</code></pre>
-<pre class="r"><code>txs = paste(unique(df$ACCESSION_NUMBER))
-total_COSMs &lt;- unique(df[which(df$GENOMIC_MUTATION_ID != &quot;null&quot;), &quot;LEGACY_MUTATION_ID&quot;])
-print(paste(&quot;Total COSMs for this gene is: &quot;, length(total_COSMs), sep = &quot; &quot;))</code></pre>
-<pre><code>## [1] &quot;Total COSMs for this gene is:  61&quot;</code></pre>
-<pre class="r"><code>for (i in txs){
-  print(paste(i, length(unique(df[which(df$ACCESSION_NUMBER %in% i &amp; df$MUTATION_DESCRIPTION != &quot;Unknown&quot;), &quot;LEGACY_MUTATION_ID&quot;]))), sep = &quot;_&quot;)
-}</code></pre>
-<pre><code>## [1] &quot;ENST00000371098.6 10&quot;
+## [1] &quot;ENST00000371098.6 10&quot;
 ## [1] &quot;ENST00000371095.7 17&quot;
 ## [1] &quot;ENST00000354359.11 18&quot;
 ## [1] &quot;ENST00000371085.7 18&quot;
@@ -613,10 +592,478 @@ print(paste(&quot;Total COSMs for this gene is: &quot;, length(total_COSMs), sep
 ## [1] &quot;ENST00000306120.3 31&quot;
 ## [1] &quot;ENST00000371100.8 51&quot;
 ## [1] &quot;ENST00000265620.11 17&quot;
-## [1] &quot;ENST00000313949.11 10&quot;</code></pre>
-<pre class="r"><code>print(&quot;-----------------------------&quot;)</code></pre>
-<pre><code>## [1] &quot;-----------------------------&quot;</code></pre>
-<pre class="r"><code>GNAS_ENST00000313949.11 &lt;- unique(GNAS[which(GNAS$ACCESSION_NUMBER %in% &quot;ENST00000313949.11&quot; &amp; GNAS$MUTATION_DESCRIPTION != &quot;Unknown&quot;), &quot;GENOMIC_MUTATION_ID&quot;])</code></pre>
+## [1] &quot;ENST00000313949.11 10&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;KRAS&quot;
+## [1] &quot;The Ensemble transcripts for KRAS  is: ENST00000556131.1 &amp; ENST00000256078.8 &amp; ENST00000557334.5 &amp; ENST00000311936.7&quot;
+## [1] &quot;Total COSMs for this gene is:  101&quot;
+## [1] &quot;ENST00000556131.1 49&quot;
+## [1] &quot;ENST00000256078.8 97&quot;
+## [1] &quot;ENST00000557334.5 53&quot;
+## [1] &quot;ENST00000311936.7 100&quot;
+## [1] &quot;-----------------------------&quot;</code></pre>
+</div>
+<div id="old-genes-mane" class="section level2">
+<h2>Old genes MANE</h2>
+<pre class="r"><code>for (gene in old_genes_MANE){
+  print(gene)
+  df &lt;- dat[which(dat$Gene == gene),]
+  # grep COSMIC legacy mutation IDs that are coding by selecting those that start with COSM
+  # COSN is non coding
+  df &lt;- df[str_detect(df$LEGACY_MUTATION_ID, &quot;COSM&quot;), ]
+  print(paste(&quot;The Ensemble transcripts for&quot;, gene, &quot; is:&quot;, paste(unique(df$ACCESSION_NUMBER), collapse =  &quot; &amp; &quot;), collapse = &quot;&quot;))
+
+  txs = paste(unique(df$ACCESSION_NUMBER))
+  total_COSMs &lt;- unique(df[which(df$GENOMIC_MUTATION_ID != &quot;null&quot;  &amp;  df$MUTATION_DESCRIPTION != &quot;Unknown&quot;), &quot;LEGACY_MUTATION_ID&quot;])
+  print(paste(&quot;Total COSMs for this gene is: &quot;, length(total_COSMs), sep = &quot; &quot;))
+  for (i in 1:length(txs)){
+    transcripts = txs[i]
+    
+    print(paste(transcripts, length(unique(df[which(df$ACCESSION_NUMBER %in% transcripts &amp; df$GENOMIC_MUTATION_ID != &quot;null&quot; &amp;  df$MUTATION_DESCRIPTION != &quot;Unknown&quot;), &quot;LEGACY_MUTATION_ID&quot;]))), sep = &quot;_&quot;)
+    
+    row &lt;- c(gene, transcripts, length(unique(df[which(df$ACCESSION_NUMBER %in% transcripts &amp; df$GENOMIC_MUTATION_ID != &quot;null&quot; &amp;  df$MUTATION_DESCRIPTION != &quot;Unknown&quot;), &quot;LEGACY_MUTATION_ID&quot;])))
+    summary_tbl &lt;- rbind(summary_tbl, row)
+  }
+  print(&quot;-----------------------------&quot;)
+}</code></pre>
+<pre><code>## [1] &quot;ASXL1&quot;
+## [1] &quot;The Ensemble transcripts for ASXL1  is: ENST00000497249.6 &amp; ENST00000375687.9 &amp; ENST00000542461.5 &amp; ENST00000613218.4 &amp; ENST00000375689.5 &amp; ENST00000646367.1 &amp; ENST00000306058.9 &amp; ENST00000620121.4 &amp; ENST00000646985.1&quot;
+## [1] &quot;Total COSMs for this gene is:  515&quot;
+## [1] &quot;ENST00000497249.6 3&quot;
+## [1] &quot;ENST00000375687.9 514&quot;
+## [1] &quot;ENST00000542461.5 5&quot;
+## [1] &quot;ENST00000613218.4 515&quot;
+## [1] &quot;ENST00000375689.5 3&quot;
+## [1] &quot;ENST00000646367.1 4&quot;
+## [1] &quot;ENST00000306058.9 513&quot;
+## [1] &quot;ENST00000620121.4 515&quot;
+## [1] &quot;ENST00000646985.1 513&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;ATM&quot;
+## [1] &quot;The Ensemble transcripts for ATM  is: ENST00000530958.5 &amp; ENST00000526567.5 &amp; ENST00000639953.1 &amp; ENST00000640388.1 &amp; ENST00000278616.8 &amp; ENST00000639240.1 &amp; ENST00000452508.6&quot;
+## [1] &quot;Total COSMs for this gene is:  514&quot;
+## [1] &quot;ENST00000530958.5 24&quot;
+## [1] &quot;ENST00000526567.5 13&quot;
+## [1] &quot;ENST00000639953.1 13&quot;
+## [1] &quot;ENST00000640388.1 13&quot;
+## [1] &quot;ENST00000278616.8 513&quot;
+## [1] &quot;ENST00000639240.1 13&quot;
+## [1] &quot;ENST00000452508.6 513&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;BCOR&quot;
+## [1] &quot;The Ensemble transcripts for BCOR  is: ENST00000378463.5 &amp; ENST00000342274.8 &amp; ENST00000615339.1 &amp; ENST00000378455.8 &amp; ENST00000378444.8 &amp; ENST00000397354.7&quot;
+## [1] &quot;Total COSMs for this gene is:  277&quot;
+## [1] &quot;ENST00000378463.5 114&quot;
+## [1] &quot;ENST00000342274.8 276&quot;
+## [1] &quot;ENST00000615339.1 59&quot;
+## [1] &quot;ENST00000378455.8 273&quot;
+## [1] &quot;ENST00000378444.8 277&quot;
+## [1] &quot;ENST00000397354.7 276&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;BIRC3&quot;
+## [1] &quot;The Ensemble transcripts for BIRC3  is: ENST00000532808.5 &amp; ENST00000615299.4 &amp; ENST00000263464.7&quot;
+## [1] &quot;Total COSMs for this gene is:  105&quot;
+## [1] &quot;ENST00000532808.5 105&quot;
+## [1] &quot;ENST00000615299.4 105&quot;
+## [1] &quot;ENST00000263464.7 105&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;BRAF&quot;
+## [1] &quot;The Ensemble transcripts for BRAF  is: ENST00000288602.11 &amp; ENST00000644969.1 &amp; ENST00000646891.1 &amp; ENST00000496384.7 &amp; ENST00000469930.2&quot;
+## [1] &quot;Total COSMs for this gene is:  64&quot;
+## [1] &quot;ENST00000288602.11 64&quot;
+## [1] &quot;ENST00000644969.1 63&quot;
+## [1] &quot;ENST00000646891.1 64&quot;
+## [1] &quot;ENST00000496384.7 63&quot;
+## [1] &quot;ENST00000469930.2 6&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;CALR&quot;
+## [1] &quot;The Ensemble transcripts for CALR  is: ENST00000316448.9&quot;
+## [1] &quot;Total COSMs for this gene is:  192&quot;
+## [1] &quot;ENST00000316448.9 192&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;CBL&quot;
+## [1] &quot;The Ensemble transcripts for CBL  is: ENST00000634840.1 &amp; ENST00000264033.5 &amp; ENST00000634586.1&quot;
+## [1] &quot;Total COSMs for this gene is:  172&quot;
+## [1] &quot;ENST00000634840.1 167&quot;
+## [1] &quot;ENST00000264033.5 172&quot;
+## [1] &quot;ENST00000634586.1 168&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;CEBPA&quot;
+## [1] &quot;The Ensemble transcripts for CEBPA  is: ENST00000498907.2&quot;
+## [1] &quot;Total COSMs for this gene is:  675&quot;
+## [1] &quot;ENST00000498907.2 675&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;CREBBP&quot;
+## [1] &quot;The Ensemble transcripts for CREBBP  is: ENST00000382070.7 &amp; ENST00000262367.9&quot;
+## [1] &quot;Total COSMs for this gene is:  410&quot;
+## [1] &quot;ENST00000382070.7 404&quot;
+## [1] &quot;ENST00000262367.9 410&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;CSF3R&quot;
+## [1] &quot;The Ensemble transcripts for CSF3R  is: ENST00000373104.5 &amp; ENST00000373106.5 &amp; ENST00000331941.6 &amp; ENST00000373103.5 &amp; ENST00000361632.8&quot;
+## [1] &quot;Total COSMs for this gene is:  50&quot;
+## [1] &quot;ENST00000373104.5 32&quot;
+## [1] &quot;ENST00000373106.5 47&quot;
+## [1] &quot;ENST00000331941.6 32&quot;
+## [1] &quot;ENST00000373103.5 50&quot;
+## [1] &quot;ENST00000361632.8 47&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;DDX41&quot;
+## [1] &quot;The Ensemble transcripts for DDX41  is: ENST00000507955.5 &amp; ENST00000625286.1 &amp; ENST00000629036.2&quot;
+## [1] &quot;Total COSMs for this gene is:  13&quot;
+## [1] &quot;ENST00000507955.5 13&quot;
+## [1] &quot;ENST00000625286.1 2&quot;
+## [1] &quot;ENST00000629036.2 8&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;DNMT3A&quot;
+## [1] &quot;The Ensemble transcripts for DNMT3A  is: ENST00000402667.1 &amp; ENST00000406659.3 &amp; ENST00000380746.8 &amp; ENST00000321117.9 &amp; ENST00000264709.7&quot;
+## [1] &quot;Total COSMs for this gene is:  677&quot;
+## [1] &quot;ENST00000402667.1 661&quot;
+## [1] &quot;ENST00000406659.3 12&quot;
+## [1] &quot;ENST00000380746.8 661&quot;
+## [1] &quot;ENST00000321117.9 677&quot;
+## [1] &quot;ENST00000264709.7 677&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;EP300&quot;
+## [1] &quot;The Ensemble transcripts for EP300  is: ENST00000263253.8&quot;
+## [1] &quot;Total COSMs for this gene is:  239&quot;
+## [1] &quot;ENST00000263253.8 239&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;ETNK1&quot;
+## [1] &quot;The Ensemble transcripts for ETNK1  is: ENST00000335148.7 &amp; ENST00000266517.8&quot;
+## [1] &quot;Total COSMs for this gene is:  10&quot;
+## [1] &quot;ENST00000335148.7 1&quot;
+## [1] &quot;ENST00000266517.8 10&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;ETV6&quot;
+## [1] &quot;The Ensemble transcripts for ETV6  is: ENST00000396373.8&quot;
+## [1] &quot;Total COSMs for this gene is:  131&quot;
+## [1] &quot;ENST00000396373.8 131&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;EZH2&quot;
+## [1] &quot;The Ensemble transcripts for EZH2  is: ENST00000478654.5 &amp; ENST00000460911.5 &amp; ENST00000483967.5 &amp; ENST00000350995.6 &amp; ENST00000320356.6 &amp; ENST00000476773.5&quot;
+## [1] &quot;Total COSMs for this gene is:  356&quot;
+## [1] &quot;ENST00000478654.5 344&quot;
+## [1] &quot;ENST00000460911.5 355&quot;
+## [1] &quot;ENST00000483967.5 355&quot;
+## [1] &quot;ENST00000350995.6 347&quot;
+## [1] &quot;ENST00000320356.6 356&quot;
+## [1] &quot;ENST00000476773.5 344&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;FLT3&quot;
+## [1] &quot;The Ensemble transcripts for FLT3  is: ENST00000241453.11&quot;
+## [1] &quot;Total COSMs for this gene is:  517&quot;
+## [1] &quot;ENST00000241453.11 517&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;GATA1&quot;
+## [1] &quot;The Ensemble transcripts for GATA1  is: ENST00000376665.4 &amp; ENST00000376670.7&quot;
+## [1] &quot;Total COSMs for this gene is:  187&quot;
+## [1] &quot;ENST00000376665.4 183&quot;
+## [1] &quot;ENST00000376670.7 187&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;GATA2&quot;
+## [1] &quot;The Ensemble transcripts for GATA2  is: ENST00000487848.5 &amp; ENST00000430265.6 &amp; ENST00000341105.6&quot;
+## [1] &quot;Total COSMs for this gene is:  104&quot;
+## [1] &quot;ENST00000487848.5 104&quot;
+## [1] &quot;ENST00000430265.6 100&quot;
+## [1] &quot;ENST00000341105.6 104&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;GNB1&quot;
+## [1] &quot;The Ensemble transcripts for GNB1  is: ENST00000610897.4 &amp; ENST00000615252.4 &amp; ENST00000378609.8&quot;
+## [1] &quot;Total COSMs for this gene is:  16&quot;
+## [1] &quot;ENST00000610897.4 16&quot;
+## [1] &quot;ENST00000615252.4 5&quot;
+## [1] &quot;ENST00000378609.8 16&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;HRAS&quot;
+## [1] &quot;The Ensemble transcripts for HRAS  is: ENST00000397596.6 &amp; ENST00000451590.5 &amp; ENST00000397594.5 &amp; ENST00000311189.7 &amp; ENST00000417302.5&quot;
+## [1] &quot;Total COSMs for this gene is:  14&quot;
+## [1] &quot;ENST00000397596.6 14&quot;
+## [1] &quot;ENST00000451590.5 14&quot;
+## [1] &quot;ENST00000397594.5 12&quot;
+## [1] &quot;ENST00000311189.7 14&quot;
+## [1] &quot;ENST00000417302.5 12&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;IDH1&quot;
+## [1] &quot;The Ensemble transcripts for IDH1  is: ENST00000446179.5 &amp; ENST00000415913.5 &amp; ENST00000345146.6&quot;
+## [1] &quot;Total COSMs for this gene is:  37&quot;
+## [1] &quot;ENST00000446179.5 37&quot;
+## [1] &quot;ENST00000415913.5 37&quot;
+## [1] &quot;ENST00000345146.6 37&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;IDH2&quot;
+## [1] &quot;The Ensemble transcripts for IDH2  is: ENST00000540499.2 &amp; ENST00000559482.5 &amp; ENST00000330062.7&quot;
+## [1] &quot;Total COSMs for this gene is:  36&quot;
+## [1] &quot;ENST00000540499.2 34&quot;
+## [1] &quot;ENST00000559482.5 9&quot;
+## [1] &quot;ENST00000330062.7 36&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;IKZF1&quot;
+## [1] &quot;The Ensemble transcripts for IKZF1  is: ENST00000612658.4 &amp; ENST00000343574.9 &amp; ENST00000438033.5 &amp; ENST00000439701.2 &amp; ENST00000440768.6 &amp; ENST00000359197.9 &amp; ENST00000349824.8 &amp; ENST00000331340.8 &amp; ENST00000646110.1 &amp; ENST00000615491.4 &amp; ENST00000413698.5 &amp; ENST00000357364.8 &amp; ENST00000644005.1 &amp; ENST00000346667.8 &amp; ENST00000492782.6&quot;
+## [1] &quot;Total COSMs for this gene is:  69&quot;
+## [1] &quot;ENST00000612658.4 41&quot;
+## [1] &quot;ENST00000343574.9 56&quot;
+## [1] &quot;ENST00000438033.5 56&quot;
+## [1] &quot;ENST00000439701.2 67&quot;
+## [1] &quot;ENST00000440768.6 26&quot;
+## [1] &quot;ENST00000359197.9 67&quot;
+## [1] &quot;ENST00000349824.8 45&quot;
+## [1] &quot;ENST00000331340.8 69&quot;
+## [1] &quot;ENST00000646110.1 6&quot;
+## [1] &quot;ENST00000615491.4 28&quot;
+## [1] &quot;ENST00000413698.5 6&quot;
+## [1] &quot;ENST00000357364.8 67&quot;
+## [1] &quot;ENST00000644005.1 69&quot;
+## [1] &quot;ENST00000346667.8 26&quot;
+## [1] &quot;ENST00000492782.6 6&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;JAK1&quot;
+## [1] &quot;The Ensemble transcripts for JAK1  is: ENST00000342505.4&quot;
+## [1] &quot;Total COSMs for this gene is:  76&quot;
+## [1] &quot;ENST00000342505.4 76&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;JAK2&quot;
+## [1] &quot;The Ensemble transcripts for JAK2  is: ENST00000381652.3&quot;
+## [1] &quot;Total COSMs for this gene is:  163&quot;
+## [1] &quot;ENST00000381652.3 163&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;KIT&quot;
+## [1] &quot;The Ensemble transcripts for KIT  is: ENST00000288135.5&quot;
+## [1] &quot;Total COSMs for this gene is:  249&quot;
+## [1] &quot;ENST00000288135.5 249&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;KMT2A&quot;
+## [1] &quot;The Ensemble transcripts for KMT2A  is: ENST00000389506.9 &amp; ENST00000534358.5&quot;
+## [1] &quot;Total COSMs for this gene is:  109&quot;
+## [1] &quot;ENST00000389506.9 109&quot;
+## [1] &quot;ENST00000534358.5 109&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;KMT2C&quot;
+## [1] &quot;The Ensemble transcripts for KMT2C  is: ENST00000262189.10 &amp; ENST00000355193.6&quot;
+## [1] &quot;Total COSMs for this gene is:  248&quot;
+## [1] &quot;ENST00000262189.10 248&quot;
+## [1] &quot;ENST00000355193.6 248&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;MPL&quot;
+## [1] &quot;The Ensemble transcripts for MPL  is: ENST00000372470.8 &amp; ENST00000413998.7&quot;
+## [1] &quot;Total COSMs for this gene is:  79&quot;
+## [1] &quot;ENST00000372470.8 79&quot;
+## [1] &quot;ENST00000413998.7 79&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;MYD88&quot;
+## [1] &quot;The Ensemble transcripts for MYD88  is: ENST00000443433.6 &amp; ENST00000396334.7 &amp; ENST00000417037.6 &amp; ENST00000495303.5 &amp; ENST00000424893.5&quot;
+## [1] &quot;Total COSMs for this gene is:  50&quot;
+## [1] &quot;ENST00000443433.6 25&quot;
+## [1] &quot;ENST00000396334.7 50&quot;
+## [1] &quot;ENST00000417037.6 50&quot;
+## [1] &quot;ENST00000495303.5 15&quot;
+## [1] &quot;ENST00000424893.5 40&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;NF1&quot;
+## [1] &quot;The Ensemble transcripts for NF1  is: ENST00000487476.5 &amp; ENST00000431387.8 &amp; ENST00000490416.2 &amp; ENST00000358273.8 &amp; ENST00000356175.7&quot;
+## [1] &quot;Total COSMs for this gene is:  232&quot;
+## [1] &quot;ENST00000487476.5 49&quot;
+## [1] &quot;ENST00000431387.8 54&quot;
+## [1] &quot;ENST00000490416.2 13&quot;
+## [1] &quot;ENST00000358273.8 232&quot;
+## [1] &quot;ENST00000356175.7 232&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;NFE2&quot;
+## [1] &quot;The Ensemble transcripts for NFE2  is: ENST00000553070.5 &amp; ENST00000312156.8 &amp; ENST00000435572.6 &amp; ENST00000540264.2&quot;
+## [1] &quot;Total COSMs for this gene is:  26&quot;
+## [1] &quot;ENST00000553070.5 26&quot;
+## [1] &quot;ENST00000312156.8 26&quot;
+## [1] &quot;ENST00000435572.6 26&quot;
+## [1] &quot;ENST00000540264.2 26&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;NOTCH1&quot;
+## [1] &quot;The Ensemble transcripts for NOTCH1  is: ENST00000277541.7&quot;
+## [1] &quot;Total COSMs for this gene is:  835&quot;
+## [1] &quot;ENST00000277541.7 835&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;NPM1&quot;
+## [1] &quot;The Ensemble transcripts for NPM1  is: ENST00000517671.5 &amp; ENST00000393820.2 &amp; ENST00000351986.10 &amp; ENST00000296930.9&quot;
+## [1] &quot;Total COSMs for this gene is:  120&quot;
+## [1] &quot;ENST00000517671.5 120&quot;
+## [1] &quot;ENST00000393820.2 7&quot;
+## [1] &quot;ENST00000351986.10 119&quot;
+## [1] &quot;ENST00000296930.9 120&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;NRAS&quot;
+## [1] &quot;The Ensemble transcripts for NRAS  is: ENST00000369535.4&quot;
+## [1] &quot;Total COSMs for this gene is:  68&quot;
+## [1] &quot;ENST00000369535.4 68&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;PAX5&quot;
+## [1] &quot;The Ensemble transcripts for PAX5  is: ENST00000523241.5 &amp; ENST00000520281.5 &amp; ENST00000377847.6 &amp; ENST00000358127.8 &amp; ENST00000446742.5 &amp; ENST00000523145.5 &amp; ENST00000522003.5 &amp; ENST00000520154.5 &amp; ENST00000377852.6 &amp; ENST00000377853.6 &amp; ENST00000414447.5&quot;
+## [1] &quot;Total COSMs for this gene is:  93&quot;
+## [1] &quot;ENST00000523241.5 81&quot;
+## [1] &quot;ENST00000520281.5 80&quot;
+## [1] &quot;ENST00000377847.6 81&quot;
+## [1] &quot;ENST00000358127.8 93&quot;
+## [1] &quot;ENST00000446742.5 72&quot;
+## [1] &quot;ENST00000523145.5 26&quot;
+## [1] &quot;ENST00000522003.5 38&quot;
+## [1] &quot;ENST00000520154.5 78&quot;
+## [1] &quot;ENST00000377852.6 84&quot;
+## [1] &quot;ENST00000377853.6 90&quot;
+## [1] &quot;ENST00000414447.5 83&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;PHF6&quot;
+## [1] &quot;The Ensemble transcripts for PHF6  is: ENST00000625464.2 &amp; ENST00000370800.4 &amp; ENST00000332070.7 &amp; ENST00000370803.7 &amp; ENST00000370799.5&quot;
+## [1] &quot;Total COSMs for this gene is:  267&quot;
+## [1] &quot;ENST00000625464.2 262&quot;
+## [1] &quot;ENST00000370800.4 195&quot;
+## [1] &quot;ENST00000332070.7 262&quot;
+## [1] &quot;ENST00000370803.7 262&quot;
+## [1] &quot;ENST00000370799.5 249&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;PPM1D&quot;
+## [1] &quot;The Ensemble transcripts for PPM1D  is: ENST00000305921.7 &amp; ENST00000629650.2&quot;
+## [1] &quot;Total COSMs for this gene is:  79&quot;
+## [1] &quot;ENST00000305921.7 79&quot;
+## [1] &quot;ENST00000629650.2 4&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;PTEN&quot;
+## [1] &quot;The Ensemble transcripts for PTEN  is: ENST00000371953.7&quot;
+## [1] &quot;Total COSMs for this gene is:  284&quot;
+## [1] &quot;ENST00000371953.7 284&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;PTPN11&quot;
+## [1] &quot;The Ensemble transcripts for PTPN11  is: ENST00000392597.5 &amp; ENST00000639857.1 &amp; ENST00000351677.6 &amp; ENST00000635625.1&quot;
+## [1] &quot;Total COSMs for this gene is:  104&quot;
+## [1] &quot;ENST00000392597.5 73&quot;
+## [1] &quot;ENST00000639857.1 55&quot;
+## [1] &quot;ENST00000351677.6 104&quot;
+## [1] &quot;ENST00000635625.1 104&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;RAD21&quot;
+## [1] &quot;The Ensemble transcripts for RAD21  is: ENST00000523986.5 &amp; ENST00000517749.1 &amp; ENST00000518055.1 &amp; ENST00000297338.6&quot;
+## [1] &quot;Total COSMs for this gene is:  161&quot;
+## [1] &quot;ENST00000523986.5 23&quot;
+## [1] &quot;ENST00000517749.1 11&quot;
+## [1] &quot;ENST00000518055.1 31&quot;
+## [1] &quot;ENST00000297338.6 161&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;RUNX1&quot;
+## [1] &quot;The Ensemble transcripts for RUNX1  is: ENST00000437180.5 &amp; ENST00000344691.8 &amp; ENST00000358356.9 &amp; ENST00000300305.7 &amp; ENST00000399240.5&quot;
+## [1] &quot;Total COSMs for this gene is:  577&quot;
+## [1] &quot;ENST00000437180.5 576&quot;
+## [1] &quot;ENST00000344691.8 576&quot;
+## [1] &quot;ENST00000358356.9 415&quot;
+## [1] &quot;ENST00000300305.7 576&quot;
+## [1] &quot;ENST00000399240.5 506&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;SETBP1&quot;
+## [1] &quot;The Ensemble transcripts for SETBP1  is: ENST00000426838.8 &amp; ENST00000645568.1 &amp; ENST00000282030.5&quot;
+## [1] &quot;Total COSMs for this gene is:  76&quot;
+## [1] &quot;ENST00000426838.8 9&quot;
+## [1] &quot;ENST00000645568.1 5&quot;
+## [1] &quot;ENST00000282030.5 72&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;SF3B1&quot;
+## [1] &quot;The Ensemble transcripts for SF3B1  is: ENST00000335508.10 &amp; ENST00000487698.5 &amp; ENST00000414963.2 &amp; ENST00000409915.8&quot;
+## [1] &quot;Total COSMs for this gene is:  135&quot;
+## [1] &quot;ENST00000335508.10 135&quot;
+## [1] &quot;ENST00000487698.5 2&quot;
+## [1] &quot;ENST00000414963.2 2&quot;
+## [1] &quot;ENST00000409915.8 2&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;SH2B3&quot;
+## [1] &quot;The Ensemble transcripts for SH2B3  is: ENST00000341259.6 &amp; ENST00000538307.1&quot;
+## [1] &quot;Total COSMs for this gene is:  90&quot;
+## [1] &quot;ENST00000341259.6 89&quot;
+## [1] &quot;ENST00000538307.1 57&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;SRSF2&quot;
+## [1] &quot;The Ensemble transcripts for SRSF2  is: ENST00000508921.7 &amp; ENST00000359995.9 &amp; ENST00000392485.2&quot;
+## [1] &quot;Total COSMs for this gene is:  44&quot;
+## [1] &quot;ENST00000508921.7 41&quot;
+## [1] &quot;ENST00000359995.9 44&quot;
+## [1] &quot;ENST00000392485.2 44&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;STAG2&quot;
+## [1] &quot;The Ensemble transcripts for STAG2  is: ENST00000371160.5 &amp; ENST00000371157.7 &amp; ENST00000218089.13 &amp; ENST00000371144.7 &amp; ENST00000371145.7&quot;
+## [1] &quot;Total COSMs for this gene is:  197&quot;
+## [1] &quot;ENST00000371160.5 196&quot;
+## [1] &quot;ENST00000371157.7 196&quot;
+## [1] &quot;ENST00000218089.13 197&quot;
+## [1] &quot;ENST00000371144.7 196&quot;
+## [1] &quot;ENST00000371145.7 197&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;STAT3&quot;
+## [1] &quot;The Ensemble transcripts for STAT3  is: ENST00000389272.7 &amp; ENST00000585517.5 &amp; ENST00000588969.5 &amp; ENST00000264657.9 &amp; ENST00000404395.3&quot;
+## [1] &quot;Total COSMs for this gene is:  68&quot;
+## [1] &quot;ENST00000389272.7 65&quot;
+## [1] &quot;ENST00000585517.5 67&quot;
+## [1] &quot;ENST00000588969.5 68&quot;
+## [1] &quot;ENST00000264657.9 68&quot;
+## [1] &quot;ENST00000404395.3 68&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;STAT5B&quot;
+## [1] &quot;The Ensemble transcripts for STAT5B  is: ENST00000293328.7&quot;
+## [1] &quot;Total COSMs for this gene is:  34&quot;
+## [1] &quot;ENST00000293328.7 34&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;TET2&quot;
+## [1] &quot;The Ensemble transcripts for TET2  is: ENST00000513237.5 &amp; ENST00000413648.2 &amp; ENST00000305737.6 &amp; ENST00000540549.5 &amp; ENST00000380013.8&quot;
+## [1] &quot;Total COSMs for this gene is:  1801&quot;
+## [1] &quot;ENST00000513237.5 1791&quot;
+## [1] &quot;ENST00000413648.2 903&quot;
+## [1] &quot;ENST00000305737.6 872&quot;
+## [1] &quot;ENST00000540549.5 1791&quot;
+## [1] &quot;ENST00000380013.8 1791&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;TP53&quot;
+## [1] &quot;The Ensemble transcripts for TP53  is: ENST00000413465.6 &amp; ENST00000504937.5 &amp; ENST00000619485.4 &amp; ENST00000610623.4 &amp; ENST00000620739.4 &amp; ENST00000359597.8 &amp; ENST00000504290.5 &amp; ENST00000619186.4 &amp; ENST00000455263.6 &amp; ENST00000510385.5 &amp; ENST00000618944.4 &amp; ENST00000420246.6 &amp; ENST00000610538.4 &amp; ENST00000615910.4 &amp; ENST00000610292.4 &amp; ENST00000622645.4 &amp; ENST00000617185.4 &amp; ENST00000269305.8 &amp; ENST00000445888.6&quot;
+## [1] &quot;Total COSMs for this gene is:  895&quot;
+## [1] &quot;ENST00000413465.6 693&quot;
+## [1] &quot;ENST00000504937.5 721&quot;
+## [1] &quot;ENST00000619485.4 866&quot;
+## [1] &quot;ENST00000610623.4 582&quot;
+## [1] &quot;ENST00000620739.4 866&quot;
+## [1] &quot;ENST00000359597.8 853&quot;
+## [1] &quot;ENST00000504290.5 705&quot;
+## [1] &quot;ENST00000619186.4 598&quot;
+## [1] &quot;ENST00000455263.6 863&quot;
+## [1] &quot;ENST00000510385.5 697&quot;
+## [1] &quot;ENST00000618944.4 574&quot;
+## [1] &quot;ENST00000420246.6 855&quot;
+## [1] &quot;ENST00000610538.4 850&quot;
+## [1] &quot;ENST00000615910.4 861&quot;
+## [1] &quot;ENST00000610292.4 866&quot;
+## [1] &quot;ENST00000622645.4 842&quot;
+## [1] &quot;ENST00000617185.4 855&quot;
+## [1] &quot;ENST00000269305.8 879&quot;
+## [1] &quot;ENST00000445888.6 879&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;U2AF1&quot;
+## [1] &quot;The Ensemble transcripts for U2AF1  is: ENST00000291552.8 &amp; ENST00000398137.5 &amp; ENST00000459639.5 &amp; ENST00000380276.6&quot;
+## [1] &quot;Total COSMs for this gene is:  36&quot;
+## [1] &quot;ENST00000291552.8 35&quot;
+## [1] &quot;ENST00000398137.5 22&quot;
+## [1] &quot;ENST00000459639.5 22&quot;
+## [1] &quot;ENST00000380276.6 35&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;WT1&quot;
+## [1] &quot;The Ensemble transcripts for WT1  is: ENST00000530998.5 &amp; ENST00000379079.6 &amp; ENST00000639907.1 &amp; ENST00000452863.7 &amp; ENST00000640146.1 &amp; ENST00000639563.1 &amp; ENST00000332351.7 &amp; ENST00000448076.7&quot;
+## [1] &quot;Total COSMs for this gene is:  468&quot;
+## [1] &quot;ENST00000530998.5 431&quot;
+## [1] &quot;ENST00000379079.6 433&quot;
+## [1] &quot;ENST00000639907.1 468&quot;
+## [1] &quot;ENST00000452863.7 466&quot;
+## [1] &quot;ENST00000640146.1 468&quot;
+## [1] &quot;ENST00000639563.1 466&quot;
+## [1] &quot;ENST00000332351.7 468&quot;
+## [1] &quot;ENST00000448076.7 468&quot;
+## [1] &quot;-----------------------------&quot;
+## [1] &quot;ZRSR2&quot;
+## [1] &quot;The Ensemble transcripts for ZRSR2  is: ENST00000307771.7 &amp; ENST00000380308.7&quot;
+## [1] &quot;Total COSMs for this gene is:  111&quot;
+## [1] &quot;ENST00000307771.7 111&quot;
+## [1] &quot;ENST00000380308.7 15&quot;
+## [1] &quot;-----------------------------&quot;</code></pre>
+<pre class="r"><code>write.table(summary_tbl, &quot;transcripts_220401.tsv&quot;, sep = &quot;\t&quot;,row.names=FALSE)</code></pre>
 </div>
 </div>
 

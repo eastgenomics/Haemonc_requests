@@ -21,10 +21,10 @@ For this analysis, the Genomic mutation identifier (COSV) will filtered for anyt
 COSMIC is based off ENSEMBL transcripts and not all ensembl transcripts can be easily mapped to RefSeq transcripts which is what we use. So this analysis will only be looking at the ENSEMBL but their respective RefSeq transcripts will be noted to make this analysis more clear for us. The Refseq and ENSEMBL transcripts were mapped using CCDS (e.g https://www.ncbi.nlm.nih.gov/projects/CCDS/CcdsBrowse.cgi?REQUEST=ALLFIELDS&DATA=CXCR4&ORGANISM=0&BUILDS=CURRENTBUILDS).
 
 ```{r }
-setwd("~/Documents/Projects/myeloid/haemonc_smalltasks/bin/Haemonc_requests")
+setwd("~/Documents/Projects/myeloid/capture_design/annotation_sources/")
 
 # This table is filtered for the cancer "haematopoietic_and_lymphoid_tissue'
-dat <- read.table("~/Documents/Projects/myeloid/capture_design/annotation_sources/cosmic/V95_38_MUTANT.csv", header = T, stringsAsFactors = F, sep = ",")
+dat <- read.table("cosmic/V95_38_MUTANT.csv", header = T, stringsAsFactors = F, sep = ",")
 dat <- dat %>% 
             separate(GENE_NAME,  c("Gene", "Transcript"), "_")
 ```
@@ -32,12 +32,19 @@ dat <- dat %>%
 ```{r }
 new_genes <- c("IRF4", "CARD11", "UBA1", "ANKRD26", "BCL2", "ARID1A", "MEF2B", "BTK", "DIS3", "CXCR4", "RHOA")
 
-old_genes <- c("BCORL1", "CUX1", "FBXW7", "GNAS", "KRAS" )
+old_genes_not_MANE <- c("BCORL1", "CUX1", "FBXW7", "GNAS", "KRAS" )
+
+old_genes_MANE <- c('ASXL1',	'ATM',	'BCOR',	'BIRC3',	'BRAF',	'CALR',	'CBL',	'CEBPA',	'CREBBP',	'CSF3R',	'DDX41',	'DNMT3A',	'EP300',	'ETNK1',	'ETV6',	'EZH2',	'FLT3',	'GATA1',	'GATA2',	'GNB1',	'HRAS',	'IDH1',	'IDH2',	'IKZF1',	'JAK1',	'JAK2',	'KIT',	'KMT2A',	'KMT2C',	'MPL',	'MYD88',	'NF1',	'NFE2',	'NOTCH1',	'NPM1',	'NRAS',	'PAX5',	'PHF6',	'PPM1D',	'PTEN',	'PTPN11',	'RAD21',	'RUNX1',	'SETBP1',	'SF3B1',	'SH2B3',	'SRSF2',	'STAG2',	'STAT3',	'STAT5B',	'TET2',	'TP53',	'U2AF1',	'WT1',	'ZRSR2')
+
+old_genes_missing_one_mane <- c('BRAF', 'HRAS')
+summary_tbl <- c()
 ```
 
 
 ## New genes
 ```{r}
+
+
 for (gene in new_genes){
   print(gene)
   df <- dat[which(dat$Gene == gene),]
@@ -49,23 +56,27 @@ for (gene in new_genes){
   txs = paste(unique(df$ACCESSION_NUMBER))
   # sometimes there are null COSVs which have COSM values but these dont have clear AA annotation
   # so these can be removed
-  total_COSMs <- unique(df[which(df$GENOMIC_MUTATION_ID != "null"), "LEGACY_MUTATION_ID"])
+  total_COSMs <- unique(df[which(df$GENOMIC_MUTATION_ID != "null" &  df$MUTATION_DESCRIPTION != "Unknown"), "LEGACY_MUTATION_ID"])
   print(paste("Total COSMs for this gene is: ", length(total_COSMs), sep = " "))
-  for (i in txs){
-    print(paste(i, length(unique(df[which(df$ACCESSION_NUMBER %in% i & df$GENOMIC_MUTATION_ID != "null"), "LEGACY_MUTATION_ID"]))), sep = "_")
+  for (i in 1:length(txs)){
+    transcripts = txs[i]
+    
+    print(paste(transcripts, length(unique(df[which(df$ACCESSION_NUMBER %in% transcripts & df$GENOMIC_MUTATION_ID != "null" &  df$MUTATION_DESCRIPTION != "Unknown"), "LEGACY_MUTATION_ID"]))), sep = "_")
+    
+    row <- c(gene, transcripts, length(unique(df[which(df$ACCESSION_NUMBER %in% transcripts & df$GENOMIC_MUTATION_ID != "null" &  df$MUTATION_DESCRIPTION != "Unknown"), "LEGACY_MUTATION_ID"])))
+    summary_tbl <- rbind(summary_tbl, row)
   }
+  
   print("-----------------------------")
 }
 
 
 ```
 
-
-
-## Old genes
+## BRAF & HRAS
 
 ```{r}
-for (gene in old_genes){
+for (gene in old_genes_missing_one_mane){
   print(gene)
   df <- dat[which(dat$Gene == gene),]
   # grep COSMIC legacy mutation IDs that are coding by selecting those that start with COSM
@@ -76,68 +87,78 @@ for (gene in old_genes){
   txs = paste(unique(df$ACCESSION_NUMBER))
   # sometimes there are null COSVs which have COSM values but these dont have clear AA annotation
   # so these can be removed
-  total_COSMs <- unique(df[which(df$GENOMIC_MUTATION_ID != "null"), "LEGACY_MUTATION_ID"])
+  total_COSMs <- unique(df[which(df$GENOMIC_MUTATION_ID != "null" & df$MUTATION_DESCRIPTION != "Unknown"), "LEGACY_MUTATION_ID"])
   print(paste("Total COSMs for this gene is: ", length(total_COSMs), sep = " "))
-  for (i in txs){
-    print(paste(i, length(unique(df[which(df$ACCESSION_NUMBER %in% i & df$GENOMIC_MUTATION_ID != "null"), "LEGACY_MUTATION_ID"]))), sep = "_")
+  for (i in 1:length(txs)){
+    transcripts = txs[i]
+    
+    print(paste(transcripts, length(unique(df[which(df$ACCESSION_NUMBER %in% transcripts & df$GENOMIC_MUTATION_ID != "null" & df$MUTATION_DESCRIPTION != "Unknown"), "LEGACY_MUTATION_ID"]))), sep = "_")
+    
+    row <- c(gene, transcripts, length(unique(df[which(df$ACCESSION_NUMBER %in% transcripts & df$GENOMIC_MUTATION_ID != "null" & df$MUTATION_DESCRIPTION != "Unknown"), "LEGACY_MUTATION_ID"])))
+    summary_tbl <- rbind(summary_tbl, row)
+  }
+  print("-----------------------------")
+}
+
+
+```
+
+
+
+
+
+## Old genes not MANE
+
+```{r}
+for (gene in old_genes_not_MANE){
+  print(gene)
+  df <- dat[which(dat$Gene == gene),]
+  # grep COSMIC legacy mutation IDs that are coding by selecting those that start with COSM
+  # COSN is non coding
+  df <- df[str_detect(df$LEGACY_MUTATION_ID, "COSM"), ]
+  print(paste("The Ensemble transcripts for", gene, " is:", paste(unique(df$ACCESSION_NUMBER), collapse =  " & "), collapse = ""))
+
+  txs = paste(unique(df$ACCESSION_NUMBER))
+  total_COSMs <- unique(df[which(df$GENOMIC_MUTATION_ID != "null" &  df$MUTATION_DESCRIPTION != "Unknown"), "LEGACY_MUTATION_ID"])
+  print(paste("Total COSMs for this gene is: ", length(total_COSMs), sep = " "))
+  for (i in 1:length(txs)){
+    transcripts = txs[i]
+    
+    print(paste(transcripts, length(unique(df[which(df$ACCESSION_NUMBER %in% transcripts & df$GENOMIC_MUTATION_ID != "null" &  df$MUTATION_DESCRIPTION != "Unknown"), "LEGACY_MUTATION_ID"]))), sep = "_")
+    
+    row <- c(gene, transcripts, length(unique(df[which(df$ACCESSION_NUMBER %in% transcripts & df$GENOMIC_MUTATION_ID != "null" &  df$MUTATION_DESCRIPTION != "Unknown"), "LEGACY_MUTATION_ID"])))
+    summary_tbl <- rbind(summary_tbl, row)
   }
   print("-----------------------------")
 }
 
 ```
-## Output GNAS 
+
+## Old genes MANE
 
 ```{r}
-# save outputs
-# filter for gene
-GNAS <- dat[which(dat$Gene == "GNAS"),]
-GNAS <- GNAS[str_detect(GNAS$LEGACY_MUTATION_ID, "COSM"), ]
-write.table(GNAS, "GNAS_coding.tsv", sep = "\t",row.names=FALSE)
+for (gene in old_genes_MANE){
+  print(gene)
+  df <- dat[which(dat$Gene == gene),]
+  # grep COSMIC legacy mutation IDs that are coding by selecting those that start with COSM
+  # COSN is non coding
+  df <- df[str_detect(df$LEGACY_MUTATION_ID, "COSM"), ]
+  print(paste("The Ensemble transcripts for", gene, " is:", paste(unique(df$ACCESSION_NUMBER), collapse =  " & "), collapse = ""))
 
-
-# let's save each transcript per page
-library(openxlsx)
-xlsx_list <- list()
-sheet <- list("GNAS" = GNAS)
-xlsx_list <- c(xlsx_list, sheet)
-txs = paste(unique(GNAS$ACCESSION_NUMBER))
-for (i in txs){
-  # one for duplicates and another withou?
-  print(i)
-  txs_df <- GNAS[which(GNAS$ACCESSION_NUMBER %in% i),]
-  sheet <- list(i = txs_df)
-  xlsx_list <- c(xlsx_list, sheet)
+  txs = paste(unique(df$ACCESSION_NUMBER))
+  total_COSMs <- unique(df[which(df$GENOMIC_MUTATION_ID != "null"  &  df$MUTATION_DESCRIPTION != "Unknown"), "LEGACY_MUTATION_ID"])
+  print(paste("Total COSMs for this gene is: ", length(total_COSMs), sep = " "))
+  for (i in 1:length(txs)){
+    transcripts = txs[i]
+    
+    print(paste(transcripts, length(unique(df[which(df$ACCESSION_NUMBER %in% transcripts & df$GENOMIC_MUTATION_ID != "null" &  df$MUTATION_DESCRIPTION != "Unknown"), "LEGACY_MUTATION_ID"]))), sep = "_")
+    
+    row <- c(gene, transcripts, length(unique(df[which(df$ACCESSION_NUMBER %in% transcripts & df$GENOMIC_MUTATION_ID != "null" &  df$MUTATION_DESCRIPTION != "Unknown"), "LEGACY_MUTATION_ID"])))
+    summary_tbl <- rbind(summary_tbl, row)
+  }
+  print("-----------------------------")
 }
 
-
-names(xlsx_list) <- c("GNAS", txs)
-write.xlsx(xlsx_list, file = "GNAS_per_transcript.xlsx")
-
+write.table(summary_tbl, "transcripts_220401.tsv", sep = "\t",row.names=FALSE)
 
 ```
-
-## GNAS COSMs and Mutation not unknown
-
-```{r}
-gene = "GNAS"
-print(gene)
-df <- dat[which(dat$Gene == gene),]
-# grep COSMIC legacy mutation IDs that are coding by selecting those that start with COSM
-# COSN is non coding
-df <- df[str_detect(df$LEGACY_MUTATION_ID, "COSM"), ]
-print(paste("The Ensemble transcripts for", gene, " is:", paste(unique(df$ACCESSION_NUMBER), collapse =  " & "), collapse = ""))
-
-txs = paste(unique(df$ACCESSION_NUMBER))
-total_COSMs <- unique(df[which(df$GENOMIC_MUTATION_ID != "null"), "LEGACY_MUTATION_ID"])
-print(paste("Total COSMs for this gene is: ", length(total_COSMs), sep = " "))
-for (i in txs){
-  print(paste(i, length(unique(df[which(df$ACCESSION_NUMBER %in% i & df$MUTATION_DESCRIPTION != "Unknown"), "LEGACY_MUTATION_ID"]))), sep = "_")
-}
-print("-----------------------------")
-
-GNAS_ENST00000313949.11 <- unique(GNAS[which(GNAS$ACCESSION_NUMBER %in% "ENST00000313949.11" & GNAS$MUTATION_DESCRIPTION != "Unknown"), "GENOMIC_MUTATION_ID"])
-```
-
-
-
-
