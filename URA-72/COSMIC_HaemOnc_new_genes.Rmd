@@ -16,7 +16,7 @@ library("stringr")
 From COSMIC, the file from "COSMIC Mutation Data" (https://cancer.sanger.ac.uk/cosmic/download) was filtered for cancer "haematopoietic_and_lymphoid_tissue" and downloaded. 
 
 The aim of this analysis is to see whether the mane transcripts retain more of the variants in cosmic than the altervatives transcripts of a gene. There are a number of ways to track a COSMIC variants, either genomic position, Genomic mutation identifier (COSV) or Legacy mutation identifier (COSM).
-For this analysis, the Genomic mutation identifier (COSV) will filtered for anything not null then the Legacy mutation identifier (COSM) will be filtered for coding ID (there are COSN which is non coding).
+For this analysis, the Genomic mutation identifier (COSV) will filtered for anything not null then the Legacy mutation identifier (COSM) will be filtered for coding ID (there are COSN which is non coding). Thencosmic variants with no protein mutation description are removed as some COSM are outside exons but labelled COSM as they are thought to impact other transcript functions such as splicing, promoter regions etc.
 
 COSMIC is based off ENSEMBL transcripts and not all ensembl transcripts can be easily mapped to RefSeq transcripts which is what we use. So this analysis will only be looking at the ENSEMBL but their respective RefSeq transcripts will be noted to make this analysis more clear for us. The Refseq and ENSEMBL transcripts were mapped using CCDS (e.g https://www.ncbi.nlm.nih.gov/projects/CCDS/CcdsBrowse.cgi?REQUEST=ALLFIELDS&DATA=CXCR4&ORGANISM=0&BUILDS=CURRENTBUILDS).
 
