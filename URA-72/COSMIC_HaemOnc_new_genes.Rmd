@@ -58,6 +58,12 @@ for (gene in new_genes){
   # so these can be removed
   total_COSMs <- unique(df[which(df$GENOMIC_MUTATION_ID != "null" &  df$MUTATION_DESCRIPTION != "Unknown"), "LEGACY_MUTATION_ID"])
   print(paste("Total COSMs for this gene is: ", length(total_COSMs), sep = " "))
+  
+  # bind total COSMs to the summary table
+  row <- c(gene, "Total exonic COSMs for this gene: ", length(total_COSMs))
+  summary_tbl <- rbind(summary_tbl, row)
+  
+  # loop through transcript list to get number of COSMs then bind this to the summary table
   for (i in 1:length(txs)){
     transcripts = txs[i]
     
@@ -87,16 +93,23 @@ for (gene in old_genes_missing_one_mane){
   txs = paste(unique(df$ACCESSION_NUMBER))
   # sometimes there are null COSVs which have COSM values but these dont have clear AA annotation
   # so these can be removed
-  total_COSMs <- unique(df[which(df$GENOMIC_MUTATION_ID != "null" & df$MUTATION_DESCRIPTION != "Unknown"), "LEGACY_MUTATION_ID"])
+  total_COSMs <- unique(df[which(df$GENOMIC_MUTATION_ID != "null" &  df$MUTATION_DESCRIPTION != "Unknown"), "LEGACY_MUTATION_ID"])
   print(paste("Total COSMs for this gene is: ", length(total_COSMs), sep = " "))
+  
+  # bind total COSMs to the summary table
+  row <- c(gene, "Total exonic COSMs for this gene: ", length(total_COSMs))
+  summary_tbl <- rbind(summary_tbl, row)
+  
+  # loop through transcript list to get number of COSMs then bind this to the summary table
   for (i in 1:length(txs)){
     transcripts = txs[i]
     
-    print(paste(transcripts, length(unique(df[which(df$ACCESSION_NUMBER %in% transcripts & df$GENOMIC_MUTATION_ID != "null" & df$MUTATION_DESCRIPTION != "Unknown"), "LEGACY_MUTATION_ID"]))), sep = "_")
+    print(paste(transcripts, length(unique(df[which(df$ACCESSION_NUMBER %in% transcripts & df$GENOMIC_MUTATION_ID != "null" &  df$MUTATION_DESCRIPTION != "Unknown"), "LEGACY_MUTATION_ID"]))), sep = "_")
     
-    row <- c(gene, transcripts, length(unique(df[which(df$ACCESSION_NUMBER %in% transcripts & df$GENOMIC_MUTATION_ID != "null" & df$MUTATION_DESCRIPTION != "Unknown"), "LEGACY_MUTATION_ID"])))
+    row <- c(gene, transcripts, length(unique(df[which(df$ACCESSION_NUMBER %in% transcripts & df$GENOMIC_MUTATION_ID != "null" &  df$MUTATION_DESCRIPTION != "Unknown"), "LEGACY_MUTATION_ID"])))
     summary_tbl <- rbind(summary_tbl, row)
   }
+  
   print("-----------------------------")
 }
 
@@ -119,8 +132,16 @@ for (gene in old_genes_not_MANE){
   print(paste("The Ensemble transcripts for", gene, " is:", paste(unique(df$ACCESSION_NUMBER), collapse =  " & "), collapse = ""))
 
   txs = paste(unique(df$ACCESSION_NUMBER))
+  # sometimes there are null COSVs which have COSM values but these dont have clear AA annotation
+  # so these can be removed
   total_COSMs <- unique(df[which(df$GENOMIC_MUTATION_ID != "null" &  df$MUTATION_DESCRIPTION != "Unknown"), "LEGACY_MUTATION_ID"])
   print(paste("Total COSMs for this gene is: ", length(total_COSMs), sep = " "))
+  
+  # bind total COSMs to the summary table
+  row <- c(gene, "Total exonic COSMs for this gene: ", length(total_COSMs))
+  summary_tbl <- rbind(summary_tbl, row)
+  
+  # loop through transcript list to get number of COSMs then bind this to the summary table
   for (i in 1:length(txs)){
     transcripts = txs[i]
     
@@ -129,6 +150,7 @@ for (gene in old_genes_not_MANE){
     row <- c(gene, transcripts, length(unique(df[which(df$ACCESSION_NUMBER %in% transcripts & df$GENOMIC_MUTATION_ID != "null" &  df$MUTATION_DESCRIPTION != "Unknown"), "LEGACY_MUTATION_ID"])))
     summary_tbl <- rbind(summary_tbl, row)
   }
+  
   print("-----------------------------")
 }
 
@@ -146,8 +168,16 @@ for (gene in old_genes_MANE){
   print(paste("The Ensemble transcripts for", gene, " is:", paste(unique(df$ACCESSION_NUMBER), collapse =  " & "), collapse = ""))
 
   txs = paste(unique(df$ACCESSION_NUMBER))
-  total_COSMs <- unique(df[which(df$GENOMIC_MUTATION_ID != "null"  &  df$MUTATION_DESCRIPTION != "Unknown"), "LEGACY_MUTATION_ID"])
+  # sometimes there are null COSVs which have COSM values but these dont have clear AA annotation
+  # so these can be removed
+  total_COSMs <- unique(df[which(df$GENOMIC_MUTATION_ID != "null" &  df$MUTATION_DESCRIPTION != "Unknown"), "LEGACY_MUTATION_ID"])
   print(paste("Total COSMs for this gene is: ", length(total_COSMs), sep = " "))
+  
+  # bind total COSMs to the summary table
+  row <- c(gene, "Total exonic COSMs for this gene: ", length(total_COSMs))
+  summary_tbl <- rbind(summary_tbl, row)
+  
+  # loop through transcript list to get number of COSMs then bind this to the summary table
   for (i in 1:length(txs)){
     transcripts = txs[i]
     
@@ -156,9 +186,12 @@ for (gene in old_genes_MANE){
     row <- c(gene, transcripts, length(unique(df[which(df$ACCESSION_NUMBER %in% transcripts & df$GENOMIC_MUTATION_ID != "null" &  df$MUTATION_DESCRIPTION != "Unknown"), "LEGACY_MUTATION_ID"])))
     summary_tbl <- rbind(summary_tbl, row)
   }
+  
   print("-----------------------------")
 }
 
+summary_tbl <- as.data.frame(summary_tbl)
+colnames(summary_tbl) <- c("Gene", "Transcript", "Number of COSMs")
 write.table(summary_tbl, "transcripts_220401.tsv", sep = "\t",row.names=FALSE)
 
 ```

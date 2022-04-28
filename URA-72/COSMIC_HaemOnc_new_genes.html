@@ -354,7 +354,7 @@ library(&quot;stringr&quot;)        </code></pre>
 <div id="introduction" class="section level1">
 <h1>Introduction</h1>
 <p>From COSMIC, the file from “COSMIC Mutation Data” (<a href="https://cancer.sanger.ac.uk/cosmic/download" class="uri">https://cancer.sanger.ac.uk/cosmic/download</a>) was filtered for cancer “haematopoietic_and_lymphoid_tissue” and downloaded.</p>
-<p>The aim of this analysis is to see whether the mane transcripts retain more of the variants in cosmic than the altervatives transcripts of a gene. There are a number of ways to track a COSMIC variants, either genomic position, Genomic mutation identifier (COSV) or Legacy mutation identifier (COSM). For this analysis, the Genomic mutation identifier (COSV) will filtered for anything not null then the Legacy mutation identifier (COSM) will be filtered for coding ID (there are COSN which is non coding).</p>
+<p>The aim of this analysis is to see whether the mane transcripts retain more of the variants in cosmic than the altervatives transcripts of a gene. There are a number of ways to track a COSMIC variants, either genomic position, Genomic mutation identifier (COSV) or Legacy mutation identifier (COSM). For this analysis, the Genomic mutation identifier (COSV) will filtered for anything not null then the Legacy mutation identifier (COSM) will be filtered for coding ID (there are COSN which is non coding). Thencosmic variants with no protein mutation description are removed as some COSM are outside exons but labelled COSM as they are thought to impact other transcript functions such as splicing, promoter regions etc.</p>
 <p>COSMIC is based off ENSEMBL transcripts and not all ensembl transcripts can be easily mapped to RefSeq transcripts which is what we use. So this analysis will only be looking at the ENSEMBL but their respective RefSeq transcripts will be noted to make this analysis more clear for us. The Refseq and ENSEMBL transcripts were mapped using CCDS (e.g <a href="https://www.ncbi.nlm.nih.gov/projects/CCDS/CcdsBrowse.cgi?REQUEST=ALLFIELDS&amp;DATA=CXCR4&amp;ORGANISM=0&amp;BUILDS=CURRENTBUILDS" class="uri">https://www.ncbi.nlm.nih.gov/projects/CCDS/CcdsBrowse.cgi?REQUEST=ALLFIELDS&amp;DATA=CXCR4&amp;ORGANISM=0&amp;BUILDS=CURRENTBUILDS</a>).</p>
 <pre class="r"><code>setwd(&quot;~/Documents/Projects/myeloid/capture_design/annotation_sources/&quot;)
 
@@ -388,6 +388,12 @@ summary_tbl &lt;- c()</code></pre>
   # so these can be removed
   total_COSMs &lt;- unique(df[which(df$GENOMIC_MUTATION_ID != &quot;null&quot; &amp;  df$MUTATION_DESCRIPTION != &quot;Unknown&quot;), &quot;LEGACY_MUTATION_ID&quot;])
   print(paste(&quot;Total COSMs for this gene is: &quot;, length(total_COSMs), sep = &quot; &quot;))
+  
+  # bind total COSMs to the summary table
+  row &lt;- c(gene, &quot;Total exonic COSMs for this gene: &quot;, length(total_COSMs))
+  summary_tbl &lt;- rbind(summary_tbl, row)
+  
+  # loop through transcript list to get number of COSMs then bind this to the summary table
   for (i in 1:length(txs)){
     transcripts = txs[i]
     
@@ -488,16 +494,23 @@ summary_tbl &lt;- c()</code></pre>
   txs = paste(unique(df$ACCESSION_NUMBER))
   # sometimes there are null COSVs which have COSM values but these dont have clear AA annotation
   # so these can be removed
-  total_COSMs &lt;- unique(df[which(df$GENOMIC_MUTATION_ID != &quot;null&quot; &amp; df$MUTATION_DESCRIPTION != &quot;Unknown&quot;), &quot;LEGACY_MUTATION_ID&quot;])
+  total_COSMs &lt;- unique(df[which(df$GENOMIC_MUTATION_ID != &quot;null&quot; &amp;  df$MUTATION_DESCRIPTION != &quot;Unknown&quot;), &quot;LEGACY_MUTATION_ID&quot;])
   print(paste(&quot;Total COSMs for this gene is: &quot;, length(total_COSMs), sep = &quot; &quot;))
+  
+  # bind total COSMs to the summary table
+  row &lt;- c(gene, &quot;Total exonic COSMs for this gene: &quot;, length(total_COSMs))
+  summary_tbl &lt;- rbind(summary_tbl, row)
+  
+  # loop through transcript list to get number of COSMs then bind this to the summary table
   for (i in 1:length(txs)){
     transcripts = txs[i]
     
-    print(paste(transcripts, length(unique(df[which(df$ACCESSION_NUMBER %in% transcripts &amp; df$GENOMIC_MUTATION_ID != &quot;null&quot; &amp; df$MUTATION_DESCRIPTION != &quot;Unknown&quot;), &quot;LEGACY_MUTATION_ID&quot;]))), sep = &quot;_&quot;)
+    print(paste(transcripts, length(unique(df[which(df$ACCESSION_NUMBER %in% transcripts &amp; df$GENOMIC_MUTATION_ID != &quot;null&quot; &amp;  df$MUTATION_DESCRIPTION != &quot;Unknown&quot;), &quot;LEGACY_MUTATION_ID&quot;]))), sep = &quot;_&quot;)
     
-    row &lt;- c(gene, transcripts, length(unique(df[which(df$ACCESSION_NUMBER %in% transcripts &amp; df$GENOMIC_MUTATION_ID != &quot;null&quot; &amp; df$MUTATION_DESCRIPTION != &quot;Unknown&quot;), &quot;LEGACY_MUTATION_ID&quot;])))
+    row &lt;- c(gene, transcripts, length(unique(df[which(df$ACCESSION_NUMBER %in% transcripts &amp; df$GENOMIC_MUTATION_ID != &quot;null&quot; &amp;  df$MUTATION_DESCRIPTION != &quot;Unknown&quot;), &quot;LEGACY_MUTATION_ID&quot;])))
     summary_tbl &lt;- rbind(summary_tbl, row)
   }
+  
   print(&quot;-----------------------------&quot;)
 }</code></pre>
 <pre><code>## [1] &quot;BRAF&quot;
@@ -530,8 +543,16 @@ summary_tbl &lt;- c()</code></pre>
   print(paste(&quot;The Ensemble transcripts for&quot;, gene, &quot; is:&quot;, paste(unique(df$ACCESSION_NUMBER), collapse =  &quot; &amp; &quot;), collapse = &quot;&quot;))
 
   txs = paste(unique(df$ACCESSION_NUMBER))
+  # sometimes there are null COSVs which have COSM values but these dont have clear AA annotation
+  # so these can be removed
   total_COSMs &lt;- unique(df[which(df$GENOMIC_MUTATION_ID != &quot;null&quot; &amp;  df$MUTATION_DESCRIPTION != &quot;Unknown&quot;), &quot;LEGACY_MUTATION_ID&quot;])
   print(paste(&quot;Total COSMs for this gene is: &quot;, length(total_COSMs), sep = &quot; &quot;))
+  
+  # bind total COSMs to the summary table
+  row &lt;- c(gene, &quot;Total exonic COSMs for this gene: &quot;, length(total_COSMs))
+  summary_tbl &lt;- rbind(summary_tbl, row)
+  
+  # loop through transcript list to get number of COSMs then bind this to the summary table
   for (i in 1:length(txs)){
     transcripts = txs[i]
     
@@ -540,6 +561,7 @@ summary_tbl &lt;- c()</code></pre>
     row &lt;- c(gene, transcripts, length(unique(df[which(df$ACCESSION_NUMBER %in% transcripts &amp; df$GENOMIC_MUTATION_ID != &quot;null&quot; &amp;  df$MUTATION_DESCRIPTION != &quot;Unknown&quot;), &quot;LEGACY_MUTATION_ID&quot;])))
     summary_tbl &lt;- rbind(summary_tbl, row)
   }
+  
   print(&quot;-----------------------------&quot;)
 }</code></pre>
 <pre><code>## [1] &quot;BCORL1&quot;
@@ -614,8 +636,16 @@ summary_tbl &lt;- c()</code></pre>
   print(paste(&quot;The Ensemble transcripts for&quot;, gene, &quot; is:&quot;, paste(unique(df$ACCESSION_NUMBER), collapse =  &quot; &amp; &quot;), collapse = &quot;&quot;))
 
   txs = paste(unique(df$ACCESSION_NUMBER))
-  total_COSMs &lt;- unique(df[which(df$GENOMIC_MUTATION_ID != &quot;null&quot;  &amp;  df$MUTATION_DESCRIPTION != &quot;Unknown&quot;), &quot;LEGACY_MUTATION_ID&quot;])
+  # sometimes there are null COSVs which have COSM values but these dont have clear AA annotation
+  # so these can be removed
+  total_COSMs &lt;- unique(df[which(df$GENOMIC_MUTATION_ID != &quot;null&quot; &amp;  df$MUTATION_DESCRIPTION != &quot;Unknown&quot;), &quot;LEGACY_MUTATION_ID&quot;])
   print(paste(&quot;Total COSMs for this gene is: &quot;, length(total_COSMs), sep = &quot; &quot;))
+  
+  # bind total COSMs to the summary table
+  row &lt;- c(gene, &quot;Total exonic COSMs for this gene: &quot;, length(total_COSMs))
+  summary_tbl &lt;- rbind(summary_tbl, row)
+  
+  # loop through transcript list to get number of COSMs then bind this to the summary table
   for (i in 1:length(txs)){
     transcripts = txs[i]
     
@@ -624,6 +654,7 @@ summary_tbl &lt;- c()</code></pre>
     row &lt;- c(gene, transcripts, length(unique(df[which(df$ACCESSION_NUMBER %in% transcripts &amp; df$GENOMIC_MUTATION_ID != &quot;null&quot; &amp;  df$MUTATION_DESCRIPTION != &quot;Unknown&quot;), &quot;LEGACY_MUTATION_ID&quot;])))
     summary_tbl &lt;- rbind(summary_tbl, row)
   }
+  
   print(&quot;-----------------------------&quot;)
 }</code></pre>
 <pre><code>## [1] &quot;ASXL1&quot;
@@ -1063,7 +1094,9 @@ summary_tbl &lt;- c()</code></pre>
 ## [1] &quot;ENST00000307771.7 111&quot;
 ## [1] &quot;ENST00000380308.7 15&quot;
 ## [1] &quot;-----------------------------&quot;</code></pre>
-<pre class="r"><code>write.table(summary_tbl, &quot;transcripts_220401.tsv&quot;, sep = &quot;\t&quot;,row.names=FALSE)</code></pre>
+<pre class="r"><code>summary_tbl &lt;- as.data.frame(summary_tbl)
+colnames(summary_tbl) &lt;- c(&quot;Gene&quot;, &quot;Transcript&quot;, &quot;Number of COSMs&quot;)
+write.table(summary_tbl, &quot;transcripts_220401.tsv&quot;, sep = &quot;\t&quot;,row.names=FALSE)</code></pre>
 </div>
 </div>
 
