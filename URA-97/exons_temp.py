@@ -103,14 +103,14 @@ def main():
     df[['exon_start']] = df[['exon_start']] - 5
     df[['exon_end']] = df[['exon_end']] + 5
 
-    df.to_csv("coding_unrestricted_GRCh38_myeloid_v2.0_new_capture_regions_only.bed", sep="\t",
+    df.to_csv("coding_unrestricted_GRCh38_myeloid_5bp_flank_v2.0.0", sep="\t",
             header=False, index=False)
 
     df2 = df[['chr', 'exon_start', 'exon_end', 'transcript_id']]
-    df2.to_csv("coding_unrestricted_athena_GRCh38_myeloid_v2.0_new_capture_regions_only.bed", sep="\t",
+    df2.to_csv("coding_unrestricted_athena_GRCh38_myeloid_5bp_flank_v2.0.0", sep="\t",
             header=False, index=False)
 
-    df.to_csv("exons_cellbase_GRCh38_5bp_flank_v2.0_new_capture_regions_only.tsv", sep="\t",
+    df.to_csv("exons_cellbase_GRCh38_5bp_flank_v2.0.0", sep="\t",
             header=False, index=False)
 
 if __name__ == "__main__":
