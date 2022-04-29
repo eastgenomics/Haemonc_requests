@@ -108,7 +108,7 @@ def main():
     df[['exon_start']] = df[['exon_start']] - 5
     df[['exon_end']] = df[['exon_end']] + 5
 
-    df.to_csv("coding_unrestricted_GRCh38_myeloid_5bp_flank_v" + str(args.version_number) +".0.bed", sep="\t",
+    df.to_csv("coding_unrestricted_GRCh38_myeloid_5bp_flank_v" + str(args.version_number) +".0.0.bed", sep="\t",
             header=False, index=False)
 
     df2 = df[['chr', 'exon_start', 'exon_end', 'transcript_id']]
