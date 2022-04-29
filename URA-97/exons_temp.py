@@ -100,23 +100,6 @@ def main():
             # append to main df of all transcripts
             df = df.append(transcript_table)
 
-    # Add FLT3 intron region
-    url_address = "https://ws.zettagenomics.com/cellbase/webservices/rest/v5/hsapiens/feature/transcript/NM_004119/info?source=refseq"
-    with urllib.request.urlopen(url_address) as url:
-            data = json.loads(url.read().decode())
-    all_exons = data['responses'][0]['results'][0]['exons']
-    txs_dict = {}
-    txs_dict['chr'] = 'chr' + data['responses'][0]['results'][0]['chromosome']
-    # Cellbase always read from left to right regardless of +ve or
-    # -ve strand, so for the intron the start will be end of exon 15
-    # and end will be start of exon 14
-    txs_dict['exon_start'] = all_exons[14]['end']
-    txs_dict['exon_end'] = all_exons[13]['start']
-    txs_dict['gene_symbol'] = data['responses'][0]['results'][0]['name']
-    txs_dict['transcript_id'] = data['responses'][0]['results'][0]['id']
-    txs_dict['exonNumber'] = 14
-    flt3_df =  pd.DataFrame([txs_dict])
-
     df[['exon_start']] = df[['exon_start']] - 5
     df[['exon_end']] = df[['exon_end']] + 5
 
