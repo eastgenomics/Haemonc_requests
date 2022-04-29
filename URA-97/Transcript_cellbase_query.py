@@ -20,6 +20,13 @@ def parse_args():
         required=True
         )
 
+    parser.add_argument(
+        '-v', '--version_number',
+        type=int,
+        help='What version of the HaemOnc transcript is this? (integer)',
+        required=True
+        )
+
     args = parser.parse_args()
 
     return args
@@ -91,8 +98,6 @@ def main():
                     # start and end will be 0, so its easier to skip.
                     extracted_exons_dict = query_cellbasedict(exon, data)
                     list_txs_dict.append(extracted_exons_dict)
-                else:
-                    print(f"exon  {str(exon['exonNumber'])} is a non coding exon")
 
             # combine all exons into one table for that transcript
             transcript_table = pd.DataFrame(list_txs_dict)
@@ -103,14 +108,14 @@ def main():
     df[['exon_start']] = df[['exon_start']] - 5
     df[['exon_end']] = df[['exon_end']] + 5
 
-    df.to_csv("coding_unrestricted_GRCh38_myeloid_5bp_flank_v2.0.0", sep="\t",
+    df.to_csv("coding_unrestricted_GRCh38_myeloid_5bp_flank_v" + str(args.version_number) +".0.0", sep="\t",
             header=False, index=False)
 
     df2 = df[['chr', 'exon_start', 'exon_end', 'transcript_id']]
-    df2.to_csv("coding_unrestricted_athena_GRCh38_myeloid_5bp_flank_v2.0.0", sep="\t",
+    df2.to_csv("coding_unrestricted_athena_GRCh38_myeloid_5bp_flank_v" + str(args.version_number) +".0.0", sep="\t",
             header=False, index=False)
 
-    df.to_csv("exons_cellbase_GRCh38_5bp_flank_v2.0.0", sep="\t",
+    df.to_csv("exons_cellbase_GRCh38_5bp_flank_v" + str(args.version_number) +".0.0", sep="\t",
             header=False, index=False)
 
 if __name__ == "__main__":
