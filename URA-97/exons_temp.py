@@ -103,10 +103,6 @@ def main():
     df[['exon_start']] = df[['exon_start']] - 5
     df[['exon_end']] = df[['exon_end']] + 5
 
-    flt3_all_df = pd.concat([df,flt3_df])
-    flt3_all_df.to_csv("coding_unrestricted_cgppindel_GRCh38_myeloid_v2.0_new_capture_regions_only.bed", sep="\t",
-            header=False, index=False)
-
     df.to_csv("coding_unrestricted_GRCh38_myeloid_v2.0_new_capture_regions_only.bed", sep="\t",
             header=False, index=False)
 
