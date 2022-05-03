@@ -105,7 +105,7 @@ def main():
             # append to main df of all transcripts
             df = df.append(transcript_table)
 
-    df[['exon_start']] = df[['exon_start']] - 5
+    df[['exon_start']] = df[['exon_start']] - 5 - 1 # since start is 0 based
     df[['exon_end']] = df[['exon_end']] + 5
 
     df.to_csv("coding_unrestricted_GRCh38_myeloid_5bp_flank_v" + str(args.version_number) +".0.0.bed", sep="\t",
