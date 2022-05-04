@@ -19,7 +19,6 @@ for sample_vcf in all_vcfs:
   # Select rows where it starts with chr (removes the headers)
   fh = gzip.open(sample_vcf)
   header = []
-  print("Yay")
   for line in fh.readlines():
       if sample_vcf.endswith('.gz'):
           line = line.decode()
@@ -59,9 +58,10 @@ df['chrom_ref'] = df['chr'] + '_' + df['ref']
 df.prev_count = pd.to_numeric(df.prev_count)
 df['prev_count'] = df['prev_count'].fillna(0).astype(int)
 
+# select more than 20 to get common variants
 filtered_df = df[df.prev_count > 20]
-df.to_csv("/home/aisha/Documents/Projects/myeloid/haemonc_smalltasks/results/EBH-825/220201_allvcf_merged.tsv", sep="\t", header=True, index=False)
-filtered_df.to_csv("/home/aisha/Documents/Projects/myeloid/haemonc_smalltasks/results/EBH-825/filtered_10_perc_all_variants.tsv", sep="\t", header=True, index=False)
+df.to_csv(os.path.join(os.path.realpath('../../../'), 'results/EBH-825/220201_allvcf_merged_2.tsv'), sep="\t", header=True, index=False)
+filtered_df.to_csv(os.path.join(os.path.realpath('../../../'), 'results/EBH-825/filtered_10_perc_all_variants_2.tsv'), sep="\t", header=True, index=False)
 
 
 
