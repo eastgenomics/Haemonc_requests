@@ -1,6 +1,7 @@
 import pandas as pd
 import glob
 import os
+import gzip
 
 # this contains novaseq samples, with less than 1% contamination
 # these are the vcfs normally used in the MAF file
@@ -13,14 +14,22 @@ all_sample_dict = []
 
 for sample_vcf in all_vcfs:
   # read in sample
-  vcf_df_all = pd.read_csv(sample_vcf, sep="\t",
-                    names=cols, compression='infer')
+  vcf_df = pd.read_csv(sample_vcf, sep="\t",
+                    names=cols, compression='infer', comment = "#")
   # Select rows where it starts with chr (removes the headers)
-  vcf_df = vcf_df_all[vcf_df_all['CHROM'].str.startswith('chr')]
-  # reset the index so first row is 0
-  vcf_df.reset_index(drop=True, inplace=True)
-  # find what info headers shoud be from the vcf headerrs CSQ line
-  csq = list(vcf_df_all[vcf_df_all['CHROM'].str.contains('CSQ')]["CHROM"])[0]
+  fh = gzip.open(sample_vcf)
+  header = []
+  print("Yay")
+  for line in fh.readlines():
+      if sample_vcf.endswith('.gz'):
+          line = line.decode()
+      if line.startswith('#'):
+          header.append(line.rstrip('\n'))
+      else:
+          break
+  fh.close
+  # find what info headers shoud be from the vcf headers CSQ line
+  csq = list(filter(lambda x:'CSQ' in x, header))[0]
   csq_headers = csq.split("Format: ")[1].split(">")[0]
   info_colnames = csq_headers.split("|")
   # last element in list has a " attached so need to remove it
