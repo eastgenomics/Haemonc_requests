@@ -46,8 +46,14 @@ def query_cellbasedict(exon_dict, data):
     """
     txs_dict = {}
     txs_dict['chr'] = 'chr' + exon_dict["chromosome"]
-    txs_dict['exon_start'] = exon_dict["genomicCodingStart"]
-    # We need to include the UTR region (negative strand so its the end)
+    # We need to include the 3' UTR region (negative strand so its the start)
+    # of the NOTCH1 gene. We will use the exon[start] rather than
+    # exon[genomicCodingstart]
+    if data['responses'][0]['results'][0]['name'] == "NOTCH1" and exon_dict["exonNumber"] == 34:
+       txs_dict['exon_start'] = exon_dict["start"]
+    else:
+        txs_dict['exon_start'] = exon_dict["genomicCodingStart"]
+    # We need to include the 5' UTR region (negative strand so its the end)
     # of the ANKRD26 gene. We will use the exon[end] rather than
     # exon[genomicCodingEnd]
     if data['responses'][0]['results'][0]['name'] == "ANKRD26" and exon_dict["exonNumber"] == 1:
@@ -115,7 +121,7 @@ def main():
     df2.to_csv("coding_unrestricted_athena_GRCh38_myeloid_5bp_flank_v" + str(args.version_number) +".0.0.bed", sep="\t",
             header=False, index=False)
 
-    df.to_csv("exons_cellbase_GRCh38_5bp_flank_v" + str(args.version_number) +".0.0.bed", sep="\t",
+    df.to_csv("exons_cellbase_GRCh38_5bp_flank_v" + str(args.version_number) +".0.0.tsv", sep="\t",
             header=False, index=False)
 
 if __name__ == "__main__":
