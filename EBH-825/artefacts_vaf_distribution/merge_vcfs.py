@@ -17,16 +17,16 @@ for sample_vcf in all_vcfs:
   vcf_df = pd.read_csv(sample_vcf, sep="\t",
                     names=cols, compression='infer', comment = "#")
   # Select rows where it starts with chr (removes the headers)
-  fh = gzip.open(sample_vcf)
   header = []
-  for line in fh.readlines():
-      if sample_vcf.endswith('.gz'):
-          line = line.decode()
-      if line.startswith('#'):
-          header.append(line.rstrip('\n'))
-      else:
-          break
-  fh.close
+  with gzip.open(sample_vcf) as fh:
+    for line in fh.readlines():
+        if sample_vcf.endswith('.gz'):
+            line = line.decode()
+        if line.startswith('#'):
+            header.append(line.rstrip('\n'))
+        else:
+            break
+
   # find what info headers shoud be from the vcf headers CSQ line
   csq = list(filter(lambda x:'CSQ' in x, header))[0]
   csq_headers = csq.split("Format: ")[1].split(">")[0]
