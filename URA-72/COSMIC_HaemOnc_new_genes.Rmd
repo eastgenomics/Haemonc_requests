@@ -90,7 +90,7 @@ for (gene in old_genes_missing_one_mane){
   df <- df[str_detect(df$LEGACY_MUTATION_ID, "COSM"), ]
   print(paste("The Ensemble transcripts for", gene, " is:", paste(unique(df$ACCESSION_NUMBER), collapse =  " & "), collapse = ""))
 
-  txs = paste(unique(df$ACCESSION_NUMBER))
+  txs <- paste(unique(df$ACCESSION_NUMBER))
   # sometimes there are null COSVs which have COSM values but these dont have clear AA annotation
   # so these can be removed
   total_COSMs <- unique(df[which(df$GENOMIC_MUTATION_ID != "null" &  df$MUTATION_DESCRIPTION != "Unknown"), "LEGACY_MUTATION_ID"])
@@ -131,7 +131,7 @@ for (gene in old_genes_not_MANE){
   df <- df[str_detect(df$LEGACY_MUTATION_ID, "COSM"), ]
   print(paste("The Ensemble transcripts for", gene, " is:", paste(unique(df$ACCESSION_NUMBER), collapse =  " & "), collapse = ""))
 
-  txs = paste(unique(df$ACCESSION_NUMBER))
+  txs <- paste(unique(df$ACCESSION_NUMBER))
   # sometimes there are null COSVs which have COSM values but these dont have clear AA annotation
   # so these can be removed
   total_COSMs <- unique(df[which(df$GENOMIC_MUTATION_ID != "null" &  df$MUTATION_DESCRIPTION != "Unknown"), "LEGACY_MUTATION_ID"])
@@ -167,7 +167,7 @@ for (gene in old_genes_MANE){
   df <- df[str_detect(df$LEGACY_MUTATION_ID, "COSM"), ]
   print(paste("The Ensemble transcripts for", gene, " is:", paste(unique(df$ACCESSION_NUMBER), collapse =  " & "), collapse = ""))
 
-  txs = paste(unique(df$ACCESSION_NUMBER))
+  txs <- paste(unique(df$ACCESSION_NUMBER))
   # sometimes there are null COSVs which have COSM values but these dont have clear AA annotation
   # so these can be removed
   total_COSMs <- unique(df[which(df$GENOMIC_MUTATION_ID != "null" &  df$MUTATION_DESCRIPTION != "Unknown"), "LEGACY_MUTATION_ID"])
