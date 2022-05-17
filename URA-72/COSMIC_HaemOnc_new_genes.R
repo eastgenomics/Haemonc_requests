@@ -8,7 +8,7 @@ suppressPackageStartupMessages(library(optparse))
 option_list <- list(
   make_option(c("-c", "--cosmic_data"), action="store", default=NA,type='character',
               help="COSMIC Mutation Data"),
-  make_option(c("-i", "--input_gene"), action="store", default=NA,type='character',
+  make_option(c("-i", "--input_genes"), action="store", default=NA,type='character',
               help="A text file with row of genes"),
   make_option(c("-o", "--output_name"), action="store", default="COSMIC_output.tsv",type='character',
               help="String of the output filename")
