@@ -34,12 +34,12 @@ summary_tbl <- dat %>%
   group_by(Gene) %>%
   # calculates unique cosmic IDs without getting dups
   mutate(Total = n_distinct(LEGACY_MUTATION_ID))  %>%
-  select(Gene, ACCESSION_NUMBER, LEGACY_MUTATION_ID,Total) %>%
+  select(Gene, HGNC_ID, ACCESSION_NUMBER, LEGACY_MUTATION_ID,Total) %>%
   # Calculate unique legacy_mutation_IDs (COSMs) per transcripts
   group_by(ACCESSION_NUMBER) %>%
   summarise(n_COSMs = n_distinct(LEGACY_MUTATION_ID), across()) %>%
   # order columns
-  select(Gene,ACCESSION_NUMBER, n_COSMs, Total) %>%
+  select(Gene, HGNC_ID, ACCESSION_NUMBER, n_COSMs, Total) %>%
   unique() %>%
   # order rows by gene and transcript
   arrange(Gene, ACCESSION_NUMBER) %>%
