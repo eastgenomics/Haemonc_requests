@@ -9,6 +9,13 @@ for project in $projects; do
     done
 done
 
+# If there are archived files, dnanexus will still download due to a bug
+# in the system that will download empty files. Do resolve this, delete files
+# with zero data and merge with the old folder:
+# find . -type f -empty -delete
+# scp new_dir/ new_dir_all/
+# scp old_dir/ new_dir_all/
+
 # ! The last column (summary text) is wrapped so for everyline there is
 # extra 5 rows coming from the summary text, so to know wc -l then
 # divide by 6
