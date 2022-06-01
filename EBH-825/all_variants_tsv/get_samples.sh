@@ -1,5 +1,5 @@
 
-projects=$(dx find projects --name "002_*MYE")
+projects=$(dx find projects --name "002_*MYE" --level VIEW)
 
 for project in $projects; do
     echo $project
