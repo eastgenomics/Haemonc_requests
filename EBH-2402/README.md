@@ -2,13 +2,11 @@
 
 Original request: "Ilenia would like to know how many variants are called per case (in general) within the target regions of the MYE assay, prior to any filtering."
 
-The ebh_2402.sh Bash script takes a DNAnexus project ID as input. It downloads the unfiltered small variant VCFs and indel VCFs from that project, intersects them with the MYE assay bed file, counts the numbers of variants in the output of intersection, and generates descriptive statistics via the ebh_2402.py Python script.
+The ebh_2402.sh Bash script takes a DNAnexus project ID as input. It downloads the unfiltered VCFs, intersects them with the MYE assay bed file, counts the numbers of variants in the output of intersection, and generates descriptive statistics via the ebh_2402.py Python script.
 
 ## Resources used
 
 The small variant VCFs used are the outputs of Sentieon somatic tnhaplotyper 2 (*_markdup_recalibrated_tnhaplotyper2.vcf.gz).
-
-The indel VCFs used are the outputs of CgpPindel (*_vs_TA2_S59_L008_tumor.flagged.vcf.gz). These may not be entirely unfiltered as CgpPindel may perform some filtering.
 
 The MYE bed file used is 'coding_unrestricted_GRCh38_myeloid_5bp_flank_v2.0.0.bed' (project-Fkb6Gkj433GVVvj73J7x8KbV:file-G9vKbv0433Gg2bP9GP72pxKJ).
 
