@@ -19,7 +19,6 @@ files are expected to be named in the format
 
 parent project: 002_220606_A01303_0075_BH555NDRX2_MYE
 sample name: 2204363-22129Z0001-1-FFPE-MCL-MYE-M-EGG2_S9_L001
-VCF file name: 002_220606_A01303_0075_BH555NDRX2_MYE_204363-22129Z0001-1-FFPE-MCL-MYE-M-EGG2_S9_L001.vcf
 """
 
 
@@ -39,7 +38,7 @@ fields = ["project", "sample", "CHROM", "POS", "ID", "REF", "ALT", "QUAL",
 goi = ["ANKRD26", "CEBPA", "DDX41", "ETV6", "GATA2", "RUNX1", "TP53"]
 
 # define a dataframe to hold variants of interest
-df=pd.DataFrame(columns=fields)
+df = pd.DataFrame(columns=fields)
 
 # iterate over downloaded VCFs
 for vcf in os.listdir(input_dir):
@@ -69,7 +68,10 @@ for vcf in os.listdir(input_dir):
 
         # if variant is in a GOI, append to df
         if symbol in goi:
-            new_row = [project, sample] + [f.strip() for f in str(var).split("\t")]
+
+            new_row = [project, sample] + \
+                [f.strip() for f in str(var).split("\t")]
+
             df.loc[len(df)] = new_row
 
 # write df to output xlsx - one sheet for each GOI
@@ -77,5 +79,8 @@ with pd.ExcelWriter(output) as writer:
     for gene in goi:
 
         gene_df = df[df['INFO'].str.contains(gene)]
-        gene_df = gene_df.sort_values(by=['CHROM', 'POS', 'REF', 'ALT'], ignore_index=True)
+
+        gene_df = gene_df.sort_values(
+            by=['CHROM', 'POS', 'REF', 'ALT'], ignore_index=True)
+
         gene_df.to_excel(writer, sheet_name=gene, header=True, index=False)
