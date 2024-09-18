@@ -377,11 +377,14 @@ def create_dict_with_all_info(list_of_projects, ticket_dict):
                 project_dict[run_name]['data_available'] = (
                     ticket_dict[run_name]['time_resolved']
                 )
+<<<<<<< HEAD
                 ticket_key = ticket_dict[run_name]['ticket_key']
                 project_dict[run_name]['ticket_link'] = (
                     "https://cuhbioinformatics.atlassian.net/servicedesk/"
                     f"customer/portal/4/{ticket_key}"
                 )
+=======
+>>>>>>> 70d967af56d799941a32b70e7a8b90b54694ec7a
             else:
                 print(
                     f"Run {run_name} does not have a Jira ticket at "
@@ -411,7 +414,11 @@ def read_to_df(project_dict):
     ).assign(run_name=project_dict.keys())
 
     run_df = run_df[[
+<<<<<<< HEAD
         'run_name', 'ticket_link', 'sequence_complete', 'data_available'
+=======
+        'run_name', 'sequence_complete', 'data_available'
+>>>>>>> 70d967af56d799941a32b70e7a8b90b54694ec7a
     ]]
 
     # Convert cols to datetime so we can do calculations later
@@ -448,7 +455,10 @@ def add_tat_in_hours(run_df):
 
     return run_df
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 70d967af56d799941a32b70e7a8b90b54694ec7a
 def calculate_mean_and_median_tat(run_df):
     """
     Calculate the mean and median TAT over all runs
