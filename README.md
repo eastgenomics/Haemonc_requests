@@ -13,7 +13,7 @@ Repository for code related to small tasks / validation work for supporting myel
 | [EBH-2402]  | Count average numbers of pre-filtering variants which intersect with the MYE capture bed
 | [EBH-2585]  | Identifying germline variants from somatic (haemonc) data
 | [URA-97]  | Generate bed, exons and probe file for all HaemOnc transcripts by querying CellBase API via URL
-
+| [EBH-3094] | Calculate mean and median TAT for data release over 1 calendar year
 
 
 [EBH-825]: https://cuhbioinformatics.atlassian.net/browse/EBH-825
@@ -23,3 +23,4 @@ Repository for code related to small tasks / validation work for supporting myel
 [EBH-2402]: https://cuhbioinformatics.atlassian.net/browse/EBH-2402
 [EBH-2585]: https://cuhbioinformatics.atlassian.net/browse/EBH-2585
 [URA-97]: https://cuhbioinformatics.atlassian.net/jira/software/c/projects/URA/boards/72?modal=detail&selectedIssue=URA-97
+[EBH-3094]: https://cuhbioinformatics.atlassian.net/browse/EBH-3094
