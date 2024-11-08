@@ -23,6 +23,7 @@ def read_vcf(path):
 list_of_samples = os.listdir('bcftools_isec/')
 list_of_samples.sort()
 
+img_filenames = []
 for sample in list_of_samples:
     prod_vcf = read_vcf(f"bcftools_isec/{sample}/0000.vcf")
     dev_vcf = read_vcf(f"bcftools_isec/{sample}/0001.vcf")
@@ -33,7 +34,9 @@ for sample in list_of_samples:
     set2_size = len(dev_vcf['POS'])
     overlap_size = len(dev_shared['POS'])
     # Create a Venn diagram
-    plot = venn2(subsets=(set1_size, set2_size, overlap_size), set_labels=('Sentieon_prod', 'Sentieon_dev'))
-    plt.title(f"{sample}")
+    plot = venn2(subsets=(set1_size, set2_size, overlap_size), set_labels=('Sentieon_v3', 'Sentieon_v5'))
+    samplename = sample.split("_")[0]
+    plt.title(f"{samplename}")
     plt.savefig(f"bcftools_isec/{sample}/{sample}_diagram.jpeg")
-    plt.show(True)
+    img_filenames.append(f"bcftools_isec/{sample}/{sample}_diagram.jpeg")
+    plt.close()
