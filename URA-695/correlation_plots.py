@@ -10,15 +10,8 @@ import pandas as pd
 import re
 import seaborn as sns
 from scipy.stats import pearsonr
+import matplotlib.pyplot as plt
 
-os.chdir("/home/arun/Codes/sentieon_update/sentieon-tnbam_comparison")
-cwd = os.getcwd()
-print(cwd)
-
-# De file the general pattern to match
-pattern = '.+oncospan-cell-line-1st.+_v3.2.0\.vcf.gz$'
-
-        
 def give_vcf_df(sample_name, version, cwd):
     """
     Search for a VCF file matching the given sample name and version in the specified directory,
@@ -37,39 +30,23 @@ def give_vcf_df(sample_name, version, cwd):
     -------
     pd.DataFrame
         A pandas DataFrame containing the contents of the VCF file, with predefined columns.
-    
-    Raises
-    ------
-    FileNotFoundError
-        If no VCF file matching the given sample name and version is found in the specified directory.
 
     Examples
     --------
     >>> df = give_vcf_df('sample123', 'v1.2.3', '/path/to/vcfs')
 
     """
-    # Construct the regular expression pattern to match the VCF file
-    pattern = f'.+{sample_name}.+_{version}\.vcf.gz$'
-    
-    # Search for the first file in the directory matching the pattern.
-    # If no file matches, return None instead of raising StopIteration.
-    file = next((filename for filename in os.listdir(cwd) 
-                 if re.search(pattern, filename)), None)
-    
-    # Raise an exception if no matching file is found
-    if file is None:
-        raise FileNotFoundError(f"No file was found with {sample_name} and {version}")
+    filename = str(cwd) + str(f'/sentieon-tnbam_{version}/') + str(f'{sample_name}_markdup_recalibrated_tnhaplotyper2_normalised.vcf.gz')
 
     # Define the columns for the VCF file DataFrame
     cols = ["CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO", "FORMAT",
             "SAMPLE"]
     # Load the VCF file into a pandas DataFrame
-    dataframe = pd.read_csv(os.path.join(cwd, file), sep= "\t", comment='#',
+    df = pd.read_csv(filename, sep= "\t", comment='#',
                             names=cols)
-    return dataframe
 
-vcf3_df = give_vcf_df("oncospan-cell-line-1st", "v3.2.0", cwd)
-vcf5_df = give_vcf_df("oncospan-cell-line-1st", "v5.0.1", cwd)
+    return df
+
 
 def transformed_vcf(vcf_dataframe):
     """
@@ -90,16 +67,16 @@ def transformed_vcf(vcf_dataframe):
     pd.DataFrame
         A transformed VCF DataFrame with added "site", "AF", and "DP" columns.
     """
-    
+
     # Create an identical dataframe
     vcf_df = vcf_dataframe
-    
+
     # Create the Site column
     vcf_df['site'] = vcf_df['CHROM'].astype(str) + ':' \
                     + vcf_df['POS'].astype(str)  + '_' \
                     + vcf_df['REF'].astype(str) + '/' \
                     + vcf_df['ALT'].astype(str)
-    
+
     # Create the AF
     vcf_df['AF'] = vcf_df['SAMPLE'].str.split(':', expand=True)[2]
 
@@ -107,18 +84,11 @@ def transformed_vcf(vcf_dataframe):
     vcf_df['DP'] = vcf_df['INFO'].str.split(';').apply(
                    lambda x: ''.join((y for y in x if y.startswith('DP='))))
     vcf_df['DP'] = vcf_df['DP'].str.replace('DP=', '')
-    
+
     return vcf_df
 
-vcf3_df = transformed_vcf(vcf3_df)
-vcf5_df = transformed_vcf(vcf5_df)
 
-
-# This code bit is to figure out if there are multiallelic entries
-#vcf_test_df['site'] = vcf_test_df['CHROM'].astype(str) + ':' + vcf_test_df['POS'].astype(str)
-#multiallelic_vcf = vcf_test_df[vcf_test_df['ALT'].str.contains(",")]
-
-def merge_vcf_common_sites(vcfa_df, vcfb_df, version_a, version_b):
+def merge_vcf_common_sites(vcfa_df, vcfb_df, version_a, version_b, sample):
     """
     Merge two vcf files based on their common sites
 
@@ -139,34 +109,44 @@ def merge_vcf_common_sites(vcfa_df, vcfb_df, version_a, version_b):
         Merged dataframe with the given 2 vcf files
 
     """
-    
+
     # Define function where it returns list of common elements of two vcfs in
     # the site column
     def common_elements(list1, list2):
         return list(set(list1) & set(list2))
-    
+
     common_sites = common_elements(vcfa_df.site,vcfb_df.site)
-    print("Number of Chrom:Pos sites shared between two vcfs: " 
+    print("Number of Chrom:Pos sites shared between two vcfs: "
           + str(len(common_sites)))
-    
+
     # create dataframes containing common site rows
     vcfa_df_common = vcfa_df.loc[vcfa_df['site'].isin(common_sites)]
     vcfb_df_common = vcfb_df.loc[vcfb_df['site'].isin(common_sites)]
-    
+
     # Rename the DP column to include their corresponding version
     vcfa_df_common = vcfa_df_common.rename({'DP': f'DP_{version_a}'}, axis=1)
     vcfb_df_common = vcfb_df_common.rename({'DP': f'DP_{version_b}'}, axis=1)
-    
+
+    vcfa_df_common = vcfa_df_common.rename({'AF': f'AF_{version_a}'}, axis=1)
+    vcfb_df_common = vcfb_df_common.rename({'AF': f'AF_{version_b}'}, axis=1)
+
     # Merge both vcf files
     vcf_merged = pd.merge(vcfa_df_common, vcfb_df_common, on='site')
-    
+
     # Store DP values as integers
     vcf_merged[f'DP_{version_a}'] = vcf_merged[f'DP_{version_a}'].astype(int)
     vcf_merged[f'DP_{version_b}'] = vcf_merged[f'DP_{version_b}'].astype(int)
-    
+
+    # rename the columns more clearly
+    vcf_merged[f'AF_{version_a}'] = vcf_merged[f'AF_{version_a}'].astype(float)
+    vcf_merged[f'AF_{version_b}'] = vcf_merged[f'AF_{version_b}'].astype(float)
+
+
+    vcf_merged['AF_diff']  = abs(vcf_merged[f'AF_{version_a}'] - vcf_merged[f'AF_{version_b}'])
+    vcf_merged2 = vcf_merged[(vcf_merged[['AF_diff']]>0.001).all(axis=1)]
+    vcf_merged2.to_csv(f'plots/{sample}_v3_v5_AF_diff.tsv', index=False, sep = "\t")
     return vcf_merged
 
-vcf_merged = merge_vcf_common_sites(vcf3_df, vcf5_df, 'v3', 'v5')
 
 def make_correlation_plot_from_merged_vcf(vcf_merged, x_col, y_col, title='',
                                           xlabel=None, ylabel=None):
@@ -195,16 +175,17 @@ def make_correlation_plot_from_merged_vcf(vcf_merged, x_col, y_col, title='',
         returns a callable pot
 
     """
-    
+
     # Set x and y labels if not provided
     if xlabel is None:
         xlabel = x_col
     if ylabel is None:
         ylabel = y_col
-    
+
     # Calculate the R and p values
     r_value, p_value = pearsonr(vcf_merged[x_col], vcf_merged[y_col])
     print(r_value, p_value)
+    n_value = len(vcf_merged.index)
     # Plot the correlation plot
     plot = sns.regplot(x=x_col, y=y_col, data=vcf_merged)
     plot.set_title(title)
@@ -212,15 +193,35 @@ def make_correlation_plot_from_merged_vcf(vcf_merged, x_col, y_col, title='',
     plot.set_ylabel(ylabel)
     plot.text(x=min(vcf_merged[x_col]),
               y=max(vcf_merged[y_col]),
-              s=f'R = {r_value:.2f}, p = {p_value:.2e}', 
+              s=f'R = {r_value:.2f}, p = {p_value:.2e}, n = {n_value}',
               ha='left', va='top')
-    return plot
+    title_file = "plots/" + title + "_" + str(x_col) + "_" + str(y_col) + ".jpg"
+    plt.savefig(title_file, dpi=300)
+    plt.close()
 
-plot = make_correlation_plot_from_merged_vcf(vcf_merged, "DP_v3", "DP_v5", "Oncospan")
 
+samples = ["129325254-24102K0083-24NGSHO17-8128-F-96527893_S11_L001",
+"129404211-24107K0073-24NGSHO18-8128-M-96527893_S46_L001",
+"129450697-24109K0025-24NGSHO18-8128-M-96527893_S35_L001",
+"129459591-24109K0055-24NGSHO18-8128-F-96527893_S44_L001",
+"TMv2OCT20-HD734-1st_S35_L001",
+"TMv2OCT20-HD734-2nd_S36_L001",
+"TMv2OCT20-HD829-1st_S33_L001",
+"TMv2OCT20-HD829-2nd_S34_L001",
+"TMv2OCT20-oncospan-cell-line-1st_S39_L001",
+"TMv2OCT20-oncospan-cell-line-2nd_S40_L001"]
 
+for sample in samples:
+    cwd = os.getcwd()
+    vcf3_df = give_vcf_df(sample, "v3.2.0", cwd)
+    vcf5_df = give_vcf_df(sample, "v5.0.1", cwd)
 
-#print("Number of Chrom:Pos sites shared between two vcfs: " + str(len(common_sites)))
+    vcf3_df = transformed_vcf(vcf3_df)
+    vcf5_df = transformed_vcf(vcf5_df)
 
-#print("number of rows for vcf v2: " + str(len(vcf_test_df)))
+    vcf_merged = merge_vcf_common_sites(vcf3_df, vcf5_df, 'v3', 'v5', sample)
+    vcf_merged.to_csv(f'plots/{sample}_v3_v5.tsv', index=False, sep = "\t")
+
+    make_correlation_plot_from_merged_vcf(vcf_merged, "DP_v3", "DP_v5", sample)
+    make_correlation_plot_from_merged_vcf(vcf_merged, "AF_v3", "AF_v5", sample)
 
