@@ -43,7 +43,7 @@ def give_vcf_df(sample_name, version, cwd):
             "SAMPLE"]
     # Load the VCF file into a pandas DataFrame
     df = pd.read_csv(filename, sep= "\t", comment='#',
-                            names=cols)
+                            names=cols, low_memory=False)
 
     return df
 
@@ -200,28 +200,32 @@ def make_correlation_plot_from_merged_vcf(vcf_merged, x_col, y_col, title='',
     plt.close()
 
 
-samples = ["129325254-24102K0083-24NGSHO17-8128-F-96527893_S11_L001",
-"129404211-24107K0073-24NGSHO18-8128-M-96527893_S46_L001",
-"129450697-24109K0025-24NGSHO18-8128-M-96527893_S35_L001",
-"129459591-24109K0055-24NGSHO18-8128-F-96527893_S44_L001",
-"TMv2OCT20-HD734-1st_S35_L001",
-"TMv2OCT20-HD734-2nd_S36_L001",
-"TMv2OCT20-HD829-1st_S33_L001",
-"TMv2OCT20-HD829-2nd_S34_L001",
-"TMv2OCT20-oncospan-cell-line-1st_S39_L001",
-"TMv2OCT20-oncospan-cell-line-2nd_S40_L001"]
+def main():
+    samples = ["129325254-24102K0083-24NGSHO17-8128-F-96527893_S11_L001",
+    "129404211-24107K0073-24NGSHO18-8128-M-96527893_S46_L001",
+    "129450697-24109K0025-24NGSHO18-8128-M-96527893_S35_L001",
+    "129459591-24109K0055-24NGSHO18-8128-F-96527893_S44_L001",
+    "TMv2OCT20-HD734-1st_S35_L001",
+    "TMv2OCT20-HD734-2nd_S36_L001",
+    "TMv2OCT20-HD829-1st_S33_L001",
+    "TMv2OCT20-HD829-2nd_S34_L001",
+    "TMv2OCT20-oncospan-cell-line-1st_S39_L001",
+    "TMv2OCT20-oncospan-cell-line-2nd_S40_L001"]
 
-for sample in samples:
-    cwd = os.getcwd()
-    vcf3_df = give_vcf_df(sample, "v3.2.0", cwd)
-    vcf5_df = give_vcf_df(sample, "v5.0.1", cwd)
+    for sample in samples:
+        cwd = os.getcwd()
+        vcf3_df = give_vcf_df(sample, "v3.2.0", cwd)
+        vcf5_df = give_vcf_df(sample, "v5.0.1", cwd)
 
-    vcf3_df = transformed_vcf(vcf3_df)
-    vcf5_df = transformed_vcf(vcf5_df)
+        vcf3_df = transformed_vcf(vcf3_df)
+        vcf5_df = transformed_vcf(vcf5_df)
 
-    vcf_merged = merge_vcf_common_sites(vcf3_df, vcf5_df, 'v3', 'v5', sample)
-    vcf_merged.to_csv(f'plots/{sample}_v3_v5.tsv', index=False, sep = "\t")
+        vcf_merged = merge_vcf_common_sites(vcf3_df, vcf5_df, 'v3', 'v5', sample)
+        vcf_merged.to_csv(f'plots/{sample}_v3_v5.tsv', index=False, sep = "\t")
 
-    make_correlation_plot_from_merged_vcf(vcf_merged, "DP_v3", "DP_v5", sample)
-    make_correlation_plot_from_merged_vcf(vcf_merged, "AF_v3", "AF_v5", sample)
+        make_correlation_plot_from_merged_vcf(vcf_merged, "DP_v3", "DP_v5", sample)
+        make_correlation_plot_from_merged_vcf(vcf_merged, "AF_v3", "AF_v5", sample)
 
+
+if __name__ == "__main__":
+    main()
