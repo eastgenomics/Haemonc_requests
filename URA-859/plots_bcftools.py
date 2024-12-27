@@ -554,7 +554,6 @@ def main():
         )
         sp_oldpass_df_uniq = result[0]
         sp_newpass_df_uniq = result[1]
-        sp_oldpass_df_common = result[2]
         sp_newpass_df_common = result[3]
 
         result = bcftools_isec(
@@ -567,7 +566,6 @@ def main():
         )
         s1_oldpass_df_uniq = result[0]
         s1_newpass_df_uniq = result[1]
-        s1_oldpass_df_common = result[2]
         s1_newpass_df_common = result[3]
 
         # Venn Diagrams with only PASS variants
