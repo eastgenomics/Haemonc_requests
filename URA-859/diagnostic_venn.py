@@ -60,8 +60,8 @@ def bcftools_isec(
     os.chdir(working_dir)
 
     # Construct the regular expression pattern to match the VCF file
-    pattern_a = f".*{sample_name_a}.+_{version}\.vcf(\.gz)?$"
-    pattern_b = f".*{sample_name_b}.+_{version}\.vcf(\.gz)?$"
+    pattern_a = f".*{sample_name_a}.+_{version}\\.vcf(\\.gz)?$"
+    pattern_b = f".*{sample_name_b}.+_{version}\\.vcf(\\.gz)?$"
 
     # Find the vcf files of interest
     file_a = next(
@@ -96,7 +96,13 @@ def bcftools_isec(
     # Run bcftools isec
     isec_command = f"bcftools isec {path_a} {path_b} -p {output_dir}"
     print(isec_command)
-    subprocess.run(isec_command, shell=True, check=True)
+    try:
+        subprocess.run(isec_command, shell=True, check=True)
+    except subprocess.CalledProcessError as e:
+        if e.output:
+            print(f"Output: {e.output}")
+        if e.stderr:
+            print(f"Error: {e.stderr}")
 
     # Define the columns for the VCF file DataFrame
     cols = [
@@ -195,14 +201,16 @@ def main():
 
         output_folder = sample["diagnostic_folder"] + "/bcftools_test"
 
-        vcfa_df_uniq, vcfb_df_uniq, vcfa_df_common, vcfb_df_common = bcftools_isec(
-            working_dir,
-            sample["diagnostic"],
-            sample["validation"],
-            version,
-            sample["diagnostic_folder"],
-            sample["validation_folder"],
-            output_folder,
+        vcfa_df_uniq, vcfb_df_uniq, vcfa_df_common, vcfb_df_common = (
+            bcftools_isec(
+                working_dir,
+                sample["diagnostic"],
+                sample["validation"],
+                version,
+                sample["diagnostic_folder"],
+                sample["validation_folder"],
+                output_folder,
+            )
         )
 
         venn_diagramify(

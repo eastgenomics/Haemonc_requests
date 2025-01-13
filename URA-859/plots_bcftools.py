@@ -48,7 +48,9 @@ def list_samplenames(directory):
         files = os.listdir(directory)
 
         # Filter out directories, only keep files
-        files = [f for f in files if os.path.isfile(os.path.join(directory, f))]
+        files = [
+            f for f in files if os.path.isfile(os.path.join(directory, f))
+            ]
 
         # Extract the desired pattern from each file name
         patterns = []
@@ -72,7 +74,8 @@ def common_elements(list1, list2):
     return list(set(list1) & set(list2))
 
 
-def bcftools_isec(working_dir, sample_name, version, folder_a, folder_b, output_folder):
+def bcftools_isec(working_dir, sample_name, version,
+                  folder_a, folder_b, output_folder):
     """
     Perform bcftools isec and return output vcfs as dataframes
 
@@ -286,7 +289,8 @@ def merge_vcf_common_sites(vcfa_df, vcfb_df, version_a, version_b):
     common_sites = common_elements(vcfa_df.site, vcfb_df.site)
 
     print(
-        "Number of Chrom:Pos sites shared between two vcfs: " + str(len(common_sites))
+        "Number of Chrom:Pos sites shared between two vcfs: " +
+        str(len(common_sites))
     )
 
     # create dataframes containing common site rows
@@ -372,7 +376,8 @@ def make_correlation_plot_from_merged_vcf(
     return plot
 
 
-def venn_diagramify(vcfa_df, vcfb_df, vcf_merged, version_a, version_b, samplename):
+def venn_diagramify(vcfa_df, vcfb_df, vcf_merged,
+                    version_a, version_b, samplename):
     """
     Generate a venn diagram using the 2 transformed vcf dfs, return variants
     which are unique to to each vcf df.
@@ -479,34 +484,33 @@ def main():
         s1_vcfnew_df_common = s1_result[3]
 
         # transform dataframes for VAF and AF
-        sp_vcfold_df_uniq = remove_duplicates_vcf_df(transformed_vcf(sp_vcfold_df_uniq))
-        sp_vcfnew_df_uniq = remove_duplicates_vcf_df(transformed_vcf(sp_vcfnew_df_uniq))
+        sp_vcfold_df_uniq = remove_duplicates_vcf_df(
+            transformed_vcf(sp_vcfold_df_uniq))
+        sp_vcfnew_df_uniq = remove_duplicates_vcf_df(
+            transformed_vcf(sp_vcfnew_df_uniq))
         sp_vcfold_df_common = remove_duplicates_vcf_df(
-            transformed_vcf(sp_vcfold_df_common)
-        )
+            transformed_vcf(sp_vcfold_df_common))
         sp_vcfnew_df_common = remove_duplicates_vcf_df(
-            transformed_vcf(sp_vcfnew_df_common)
-        )
+            transformed_vcf(sp_vcfnew_df_common))
 
-        s1_vcfold_df_uniq = remove_duplicates_vcf_df(transformed_vcf(s1_vcfold_df_uniq))
-        s1_vcfnew_df_uniq = remove_duplicates_vcf_df(transformed_vcf(s1_vcfnew_df_uniq))
+        s1_vcfold_df_uniq = remove_duplicates_vcf_df(
+            transformed_vcf(s1_vcfold_df_uniq))
+        s1_vcfnew_df_uniq = remove_duplicates_vcf_df(
+            transformed_vcf(s1_vcfnew_df_uniq))
         s1_vcfold_df_common = remove_duplicates_vcf_df(
-            transformed_vcf(s1_vcfold_df_common)
-        )
+            transformed_vcf(s1_vcfold_df_common))
         s1_vcfnew_df_common = remove_duplicates_vcf_df(
-            transformed_vcf(s1_vcfnew_df_common)
-        )
+            transformed_vcf(s1_vcfnew_df_common))
 
         # Generate merged df
         sp_vcf_merged = merge_vcf_common_sites(
-            sp_vcfold_df_common, sp_vcfnew_df_common, "old_probes", "new_probes"
+            sp_vcfold_df_common, sp_vcfnew_df_common,
+            "old_probes", "new_probes"
         )
         s1_vcf_merged = merge_vcf_common_sites(
-            s1_vcfold_df_common, s1_vcfnew_df_common, "old_probes", "new_probes"
+            s1_vcfold_df_common, s1_vcfnew_df_common,
+            "old_probes", "new_probes"
         )
-
-        # Print out the sample name
-        print(sample)
 
         # Make AF correlation plot
         make_correlation_plot_from_merged_vcf(

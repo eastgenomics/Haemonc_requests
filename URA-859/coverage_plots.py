@@ -45,27 +45,33 @@ def give_tsv_df(sample_name, version, cwd, index_col):
     >>> df = give_tsv_df('sample123', 'exon_stats', '/path/to/vcfs')
 
     """
-    # Construct the regular expression pattern to match the VCF file
-    pattern = f".*{sample_name}.+_{version}\.tsv?$"
-    # print(pattern)
+    try:
+        # Construct the regular expression pattern to match the VCF file
+        pattern = f".*{sample_name}.+_{version}\\.tsv?$"
+        # print(pattern)
 
-    # Search for the first file in the directory matching the pattern.
-    # If no file matches, return None instead of raising StopIteration.
-    file = next(
-        (filename for filename in os.listdir(cwd) if re.search(pattern,
-                                                               filename)), None
-    )
-
-    # Raise an exception if no matching file is found
-    if file is None:
-        raise FileNotFoundError(
-            f"No file was found with {sample_name} and " + "{version}"
+        # Search for the first file in the directory matching the pattern.
+        # If no file matches, return None instead of raising StopIteration.
+        file = next(
+            (filename for filename in os.listdir(cwd)
+             if re.search(pattern, filename)), None
         )
 
-    # Load the VCF file into a pandas DataFrame
-    dataframe = pd.read_csv(
-        os.path.join(cwd, file), sep="\t", header=0, index_col=index_col
-    )
+        # Raise an exception if no matching file is found
+        if file is None:
+            raise FileNotFoundError(
+                f"No file was found with {sample_name} and {version}"
+            )
+
+        # Load the VCF file into a pandas DataFrame
+        dataframe = pd.read_csv(
+            os.path.join(cwd, file), sep="\t", header=0, index_col=index_col
+        )
+    except FileNotFoundError as e:
+        print(f"Error: {e}")
+
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
 
     return dataframe
 
