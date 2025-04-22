@@ -1,1 +1,8 @@
 *.env
+*.tsv
+*.csv
+*.txt
+*.bed
+*.pyc
+*.gz
+liftOver
