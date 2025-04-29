@@ -1,6 +1,9 @@
 import argparse
 from Bio import Entrez
+from Bio.Entrez import HTTPError
 import pandas as pd
+import sys
+import time
 
 from collections import defaultdict
 from utils import read_in_to_df
@@ -75,19 +78,27 @@ def get_entrez_gene_id(gene_symbol):
     list
         list of Entrez IDs (list of strings) or None if none found
     """
-    handle = Entrez.esearch(
-        db="gene", term=f"{gene_symbol}[Sym] AND Homo sapiens[Organism]"
-    )
-    record = Entrez.read(handle)
-    handle.close()
-    if record["IdList"]:
-        if len(record["IdList"]) > 1:
+    record = None
+    try:
+        handle = Entrez.esearch(
+            db="gene",
+            term=f"{gene_symbol}[Sym] AND Homo sapiens[Organism]",
+        )
+        record = Entrez.read(handle)
+        handle.close()
+    except Exception as err:
+        print(f"Entrez query failed for {gene_symbol}: {err}")
+        return None
+
+    if record and record.get("IdList"):
+        if len(record.get("IdList")) > 1:
             print(
                 f"Gene {gene_symbol} has more than one Entrez ID, searching"
                 " with all"
             )
             print(record["IdList"])
         return record["IdList"]
+
     return None
 
 
