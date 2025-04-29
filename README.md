@@ -17,6 +17,7 @@ Repository for code related to small tasks / validation work for supporting myel
 | [URA-97]  | Generate bed, exons and probe file for all HaemOnc transcripts by querying CellBase API via URL
 | [URA-695]  | Sentieon BAMs and VCFs (Mutect2) update validation
 | [URA-859] | Assess data from validation runs from the TE-97630453 panel design
+| [DI-1801] | Create a CSV with aggregated variant counts in Genie
 
 [EBH-825]: https://cuhbioinformatics.atlassian.net/browse/EBH-825
 [EBH-866]: https://cuhbioinformatics.atlassian.net/browse/EBH-866
@@ -29,3 +30,4 @@ Repository for code related to small tasks / validation work for supporting myel
 [URA-97]: https://cuhbioinformatics.atlassian.net/browse/URA-97
 [URA-695]: https://cuhbioinformatics.atlassian.net/browse/URA-695
 [URA-859]: https://cuhbioinformatics.atlassian.net/browse/URA-859
+[DI-1801]: https://cuhbioinformatics.atlassian.net/browse/DI-1801
