@@ -10,6 +10,7 @@ def read_in_to_df(
     usecols: list = None,
     header: int = None,
     dtype: dict = None,
+    converters: dict = None,
 ) -> pd.DataFrame:
     """
     Read in file to pandas dataframe
@@ -28,6 +29,9 @@ def read_in_to_df(
         row number to use as column names, by default None
     dtype: dict, optional
         dict to specify datatypes of specific columns, by default None
+    converters: dict, optional
+        dict to specify functions to convert values in specific columns, by
+        default None
 
     Returns
     -------
@@ -42,6 +46,7 @@ def read_in_to_df(
             usecols=usecols,
             header=header,
             dtype=dtype,
+            converters=converters,
         )
         return df
     except Exception as e:
