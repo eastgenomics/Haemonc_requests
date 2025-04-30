@@ -1,9 +1,8 @@
-*.env
-*.tsv
-*.csv
 *.txt
 *.bed
 *.pyc
+*.gz
+liftOver
 *.dict
 *.chain.gz
 *.fa
@@ -16,5 +15,7 @@
 *.csi
 *.tar.gz
 *.fai
-liftOver
 *.json
+*.json
+*.csv
+*.tsv

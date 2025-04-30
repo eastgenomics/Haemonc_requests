@@ -95,6 +95,19 @@ def read_in_json(json_file: str) -> list:
     data : list
         List of dictionaries from JSON file
     """
-    with open(json_file, "r", encoding="utf8") as f:
-        data = json.load(f)
-    return data
+    try:
+        with open(json_file, "r", encoding="utf8") as f:
+            data = json.load(f)
+        return data
+    except FileNotFoundError:
+        print(f"File not found: {json_file}")
+        sys.exit(1)
+    except json.JSONDecodeError as err:
+        print(
+            f"Error parsing JSON file {json_file}. Please check the format is"
+            f" correct: {err}"
+        )
+        sys.exit(1)
+    except Exception as err:
+        print(f"Error reading JSON file {json_file}: {err}")
+        sys.exit(1)
