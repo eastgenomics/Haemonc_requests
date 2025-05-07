@@ -1,5 +1,4 @@
 import argparse
-import json
 import pandas as pd
 from jinja2 import Environment, FileSystemLoader
 

@@ -17,7 +17,10 @@ def parse_args() -> argparse.Namespace:
         Namespace of passed command line argument inputs
     """
     parser = argparse.ArgumentParser(
-        description="Information required to normalise variants"
+        description=(
+            "Information required to convert variants to VCF description"
+            " and write out as CSV and VCF files"
+        )
     )
 
     parser.add_argument(
@@ -38,14 +41,19 @@ def parse_args() -> argparse.Namespace:
         "--info_fields",
         required=True,
         type=str,
-        help="Path to JSON file with info fields for VCF",
+        help=(
+            "Path to JSON file with columns to be added as INFO fields in VCF"
+        ),
     )
 
     parser.add_argument(
         "--output_csv",
         required=True,
         type=str,
-        help="Name of output CSV file with aggregated counts",
+        help=(
+            "Name of output CSV file with aggregated counts and VCF-like"
+            " description"
+        ),
     )
 
     parser.add_argument(
@@ -60,7 +68,7 @@ def parse_args() -> argparse.Namespace:
 
 def read_in_fasta(filename):
     """
-    Read in fASTA to pysam.FastaFile object
+    Read in FASTA to pysam.FastaFile object
 
     Parameters
     ----------
@@ -87,48 +95,27 @@ def read_in_fasta(filename):
         raise ValueError(f"Invalid FASTA format: {err}") from err
 
 
-def get_ref_contig_info(fasta):
+def convert_maf_like_variant_to_vcf_description(row, fasta):
     """
-    Get a list of contigs from a FASTA file
-
-    Parameters
-    ----------
-    fasta : pysam.FastaFile
-        FASTA file as pysam object
-
-    Returns
-    -------
-    contigs : list
-        list of strings, each representing a FASTA contig
-    """
-    contigs = []
-    for contig in fasta.references:
-        length = fasta.get_reference_length(contig)
-        contigs.append(f"##contig=<ID={contig},length={length}>")
-    return contigs
-
-
-def normalise_variant_row(row, fasta):
-    """
-    Normalise a row of data
+    Convert a row of data from MAF-like format to VCF-like format
 
     Parameters
     ----------
     row : pd.Series
-        Row of data to normalise
+        Row of data to convert
     fasta : pysam.FastaFile
         FASTA file as pysam object
 
     Returns
     -------
-    norm_chrom : str
-        Normalised chrom
-    norm_pos : int
-        Normalised position
-    norm_ref : str
-        Normalised reference allele
-    norm_alt : str
-        Normalised alternate allele
+    vcf_chrom : str
+        Chrom in VCF-like format
+    vcf_pos : int
+        Position in VCF-like format
+    vcf_ref : str
+        Reference allele in VCF-like format
+    vcf_alt : str
+        Alt allele in VCF-like format
     """
     # Set explicit datatypes to avoid any issues when querying
     chrom, pos, ref, alt = (
@@ -138,8 +125,8 @@ def normalise_variant_row(row, fasta):
         str(row["Tumor_Seq_Allele2"]),
     )
 
-    # Set norm values to original by default
-    norm_chrom, norm_pos, norm_ref, norm_alt = chrom, pos, ref, alt
+    # Set VCF-like values to original by default
+    vcf_chrom, vcf_pos, vcf_ref, vcf_alt = chrom, pos, ref, alt
 
     # Replace ref and alt '-' or other weird chars with ""
     ref = "" if re.fullmatch(r"[-?0]+", ref) else ref
@@ -162,32 +149,31 @@ def normalise_variant_row(row, fasta):
         # For simple insertions, pos is already position of preceding bp
         if ref == "" and len(ref_seq) > 0:
             prefix_bp = ref_seq[1]
-            norm_ref = prefix_bp
-            norm_pos = pos
-            norm_alt = prefix_bp + alt
-        # It's a deletion - we need the remove one from position
+            vcf_ref = prefix_bp
+            vcf_pos = pos
+            vcf_alt = prefix_bp + alt
+        # It's a deletion - we need to remove 1 from position
         else:
-            norm_ref = prefix_bp + ref
-            norm_alt = prefix_bp
-            norm_pos = pos - 1
+            vcf_ref = prefix_bp + ref
+            vcf_alt = prefix_bp
+            vcf_pos = pos - 1
 
     # For non-indels, verify ref allele
     else:
         ref_from_fasta = ref_seq[1 : len(ref) + 1]
         if ref != ref_from_fasta:
-            # Reference mismatch - keep original values
             print(
                 f"Reference mismatch for {chrom}-{pos}-{ref}-{alt} -"
                 f" {ref_from_fasta} found in FASTA"
             )
 
-    return norm_chrom, norm_pos, norm_ref, norm_alt
+    return vcf_chrom, vcf_pos, vcf_ref, vcf_alt
 
 
 def convert_to_vcf_representation(genie_count_data, fasta):
     """
-    Make new columns in our df with the normalised chrom, pos, ref and alt in
-    GRCh37
+    Make new columns with the VCF-like description for chrom, pos,
+    ref and alt in GRCh37
 
     Parameters
     ----------
@@ -200,11 +186,14 @@ def convert_to_vcf_representation(genie_count_data, fasta):
     -------
     genie_count_data : pd.DataFrame
         Genie data with one row per variant and count info, with new columns
-        chrom_norm, pos_norm, ref_norm and alt_norm
+        chrom_vcf, pos_vcf, ref_vcf and alt_vcf
     """
-    genie_count_data[["chrom_norm", "start_norm", "ref_norm", "alt_norm"]] = (
+    genie_count_data[["chrom_vcf", "pos_vcf", "ref_vcf", "alt_vcf"]] = (
         genie_count_data.apply(
-            lambda row: pd.Series(normalise_variant_row(row, fasta)), axis=1
+            lambda row: pd.Series(
+                convert_maf_like_variant_to_vcf_description(row, fasta)
+            ),
+            axis=1,
         )
     )
 
@@ -212,19 +201,24 @@ def convert_to_vcf_representation(genie_count_data, fasta):
 
 
 def write_variants_to_vcf(
-    genie_counts_normalised, output_vcf, fasta, info_fields
+    genie_counts_vcf_description, output_vcf, fasta, info_fields
 ):
     """
-    _summary_
+    Write out the dataframe (with VCF-like description) to a VCF file
+    with the INFO fields specified in the JSON file
 
     Parameters
     ----------
-    genie_counts_normalised : _type_
-        _description_
-    output_vcf : _type_
-        _description_
-    fasta : _type_
-        _description_
+    genie_counts_vcf_description : pd.DataFrame
+        Dataframe with one row per variant and count info and columns with
+        VCF-like description
+    output_vcf : str
+        Name of output VCF file
+    fasta : pysam.FastaFile
+        FASTA file as pysam object
+    info_fields : list
+        List of dictionaries with INFO field names and descriptions
+        to be added to the VCF file
     """
     header = pysam.VariantHeader()
     header.add_line("##fileformat=VCFv4.2")
@@ -238,19 +232,21 @@ def write_variants_to_vcf(
             field["id"], field["number"], field["type"], field["description"]
         )
     header.info.add(
-        "Genie_original_coords",
+        "Genie_original_description",
         "1",
         "String",
         "Original variant info from Genie",
     )
 
     vcf_out = pysam.VariantFile(output_vcf, "w", header=header)
-    for _, row in genie_counts_normalised.iterrows():
-        # Create a new record
+    # For each original variant, write new variant record with all INFO
+    # fields specified in the JSON file
+    # Take 1 away from start due to differences in Pysam representation
+    for _, row in genie_counts_vcf_description.iterrows():
         record = vcf_out.new_record(
-            contig=str(row["chrom_norm"]),
-            start=int(row["start_norm"]) - 1,
-            alleles=(row["ref_norm"], row["alt_norm"]),
+            contig=str(row["chrom_vcf"]),
+            start=int(row["pos_vcf"]) - 1,
+            alleles=(row["ref_vcf"], row["alt_norm"]),
             id=".",
             qual=None,
             filter=None,
@@ -266,12 +262,14 @@ def write_variants_to_vcf(
 
                 if field_name == "Consequence":
                     # Replace any commas with "&" to avoid VCF parsing issues
+                    # of commas
                     field_value = field_value.replace(",", "&")
                 record.info[field["id"]] = field_value
+
         # Add in original Genie GRCh37 chrom-pos-ref-alt
         orig_coord_str = f"{row['Chromosome']}_{row['Start_Position']}_{row['Reference_Allele']}_{row['Tumor_Seq_Allele2']}"
-        record.info["Genie_original_coords"] = orig_coord_str
-        # Write the record
+        record.info["Genie_original_description"] = orig_coord_str
+
         vcf_out.write(record)
 
     vcf_out.close()
@@ -290,16 +288,14 @@ def main():
         },
     )
     fasta = read_in_fasta(args.fasta)
-    genie_counts_normalised = convert_to_vcf_representation(
-        genie_counts, fasta
-    )
-    genie_counts_normalised.to_csv(
+    genie_counts_vcf_desc = convert_to_vcf_representation(genie_counts, fasta)
+    genie_counts_vcf_desc.to_csv(
         args.output_csv,
         index=False,
     )
     info_fields = read_in_json(args.info_fields)
     write_variants_to_vcf(
-        genie_counts_normalised, args.output_vcf, fasta, info_fields
+        genie_counts_vcf_desc, args.output_vcf, fasta, info_fields
     )
 
 

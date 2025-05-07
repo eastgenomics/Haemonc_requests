@@ -15,7 +15,5 @@ liftOver
 *.csi
 *.tar.gz
 *.fai
-*.json
-*.json
 *.csv
 *.tsv

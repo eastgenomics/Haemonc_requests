@@ -1,9 +1,6 @@
 import argparse
 from Bio import Entrez
-from Bio.Entrez import HTTPError
 import pandas as pd
-import sys
-import time
 
 from collections import defaultdict
 from utils import read_in_to_df

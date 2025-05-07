@@ -1,0 +1,198 @@
+[
+    {
+        "id": "Hugo_Symbol",
+        "number": "1",
+        "type": "String",
+        "description": "Gene symbol",
+        "column_name": "Hugo_Symbol"
+    },
+    {
+        "id": "HGVSc",
+        "number": "1",
+        "type": "String",
+        "description": "HGVSc representation",
+        "column_name": "HGVSc"
+    },
+    {
+        "id": "HGVSp",
+        "number": "1",
+        "type": "String",
+        "description": "HGVSp representation",
+        "column_name": "HGVSp"
+    },
+    {
+        "id": "RefSeq",
+        "number": "1",
+        "type": "String",
+        "description": "RefSeq transcript ID",
+        "column_name": "RefSeq"
+    },
+    {
+        "id": "Consequence",
+        "number": ".",
+        "type": "String",
+        "description": ".",
+        "column_name": "Consequence"
+    },
+    {
+        "id": "Variant_Classification",
+        "number": ".",
+        "type": "String",
+        "description": ".",
+        "column_name": "Variant_Classification"
+    },
+    {
+        "id": "all_cancers_count",
+        "number": "1",
+        "type": "Integer",
+        "description": "Genie count in all cancers",
+        "column_name": "all_cancers_count"
+    },
+    {
+        "id": "haemonc_cancers_count",
+        "number": "1",
+        "type": "Integer",
+        "description": "Genie count in haemonc cancers",
+        "column_name": "haemonc_cancers_count"
+    },
+    {
+        "id": "Blastic_Plasmacytoid_Dendritic_Cell_Neoplasm_count",
+        "number": "1",
+        "type": "Integer",
+        "description": "Genie count in Blastic Plasmacytoid Dendritic Cell Neoplasm",
+        "column_name": "Blastic Plasmacytoid Dendritic Cell Neoplasm_count"
+    },
+    {
+        "id": "Angiomatoid_Fibrous_Histiocytoma_count",
+        "number": "1",
+        "type": "Integer",
+        "description": "Genie count in Angiomatoid Fibrous Histiocytoma",
+        "column_name": "Angiomatoid Fibrous Histiocytoma_count"
+    },
+    {
+        "id": "Myeloproliferative_Neoplasms_count",
+        "number": "1",
+        "type": "Integer",
+        "description": "Genie count in Myeloproliferative Neoplasms",
+        "column_name": "Myeloproliferative Neoplasms_count"
+    },
+    {
+        "id": "Myelodysplastic_Myeloproliferative_Neoplasms_count",
+        "number": "1",
+        "type": "Integer",
+        "description": "Genie count in Myelodysplastic/Myeloproliferative Neoplasms",
+        "column_name": "Myelodysplastic/Myeloproliferative Neoplasms_count"
+    },
+    {
+        "id": "Myelodysplastic_Syndromes_count",
+        "number": "1",
+        "type": "Integer",
+        "description": "Genie count in Myelodysplastic Syndromes",
+        "column_name": "Myelodysplastic Syndromes_count"
+    },
+    {
+        "id": "Mature_B_Cell_Neoplasms_count",
+        "number": "1",
+        "type": "Integer",
+        "description": "Genie count in Mature B-Cell Neoplasms",
+        "column_name": "Mature B-Cell Neoplasms_count"
+    },
+    {
+        "id": "Non_Hodgkin_Lymphoma_count",
+        "number": "1",
+        "type": "Integer",
+        "description": "Genie count in Non-Hodgkin Lymphoma",
+        "column_name": "Non-Hodgkin Lymphoma_count"
+    },
+    {
+        "id": "Lymphatic_Cancer_NOS_count",
+        "number": "1",
+        "type": "Integer",
+        "description": "Genie count in Lymphatic Cancer NOS",
+        "column_name": "Lymphatic Cancer NOS_count"
+    },
+    {
+        "id": "Mastocytosis_count",
+        "number": "1",
+        "type": "Integer",
+        "description": "Genie count in Mastocytosis",
+        "column_name": "Mastocytosis_count"
+    },
+    {
+        "id": "Hodgkin_Lymphoma_count",
+        "number": "1",
+        "type": "Integer",
+        "description": "Genie count in Hodgkin Lymphoma",
+        "column_name": "Hodgkin Lymphoma_count"
+    },
+    {
+        "id": "Myeloid_Neoplasms_with_Germ_Line_Predisposition_count",
+        "number": "1",
+        "type": "Integer",
+        "description": "Genie count in Myeloid Neoplasms with Germ Line Predisposition",
+        "column_name": "Myeloid Neoplasms with Germ Line Predisposition_count"
+    },
+    {
+        "id": "Histiocytosis_count",
+        "number": "1",
+        "type": "Integer",
+        "description": "Genie count in Histiocytosis",
+        "column_name": "Histiocytosis_count"
+    },
+    {
+        "id": "T_Lymphoblastic_Leukemia_Lymphoma_count",
+        "number": "1",
+        "type": "Integer",
+        "description": "Genie count in T-Lymphoblastic Leukemia/Lymphoma",
+        "column_name": "T-Lymphoblastic Leukemia/Lymphoma_count"
+    },
+    {
+        "id": "B_Lymphoblastic_Leukemia_Lymphoma_count",
+        "number": "1",
+        "type": "Integer",
+        "description": "Genie count in B-Lymphoblastic Leukemia/Lymphoma",
+        "column_name": "B-Lymphoblastic Leukemia/Lymphoma_count"
+    },
+    {
+        "id": "Leukemia_count",
+        "number": "1",
+        "type": "Integer",
+        "description": "Genie count in Leukemia",
+        "column_name": "Leukemia_count"
+    },
+    {
+        "id": "Blood_Cancer_NOS_count",
+        "number": "1",
+        "type": "Integer",
+        "description": "Genie count in Blood Cancer, NOS",
+        "column_name": "Blood Cancer, NOS_count"
+    },
+    {
+        "id": "Mature_T_and_NK_Neoplasms_count",
+        "number": "1",
+        "type": "Integer",
+        "description": "Genie count in Mature T and NK Neoplasms",
+        "column_name": "Mature T and NK Neoplasms_count"
+    },
+    {
+        "id": "Blood_Cancer_count",
+        "number": "1",
+        "type": "Integer",
+        "description": "Genie count in Blood Cancer",
+        "column_name": "Blood Cancer_count"
+    },
+    {
+        "id": "Posttransplant_Lymphoproliferative_Disorders_count",
+        "number": "1",
+        "type": "Integer",
+        "description": "Genie count in Posttransplant Lymphoproliferative Disorders",
+        "column_name": "Posttransplant Lymphoproliferative Disorders_count"
+    },
+    {
+        "id": "Lymphatic_Cancer_count",
+        "number": "1",
+        "type": "Integer",
+        "description": "Genie count in Lymphatic Cancer",
+        "column_name": "Lymphatic Cancer_count"
+    }
+]

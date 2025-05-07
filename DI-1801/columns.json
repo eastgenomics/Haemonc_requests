@@ -1,0 +1,135 @@
+[
+    {
+        "title": "row",
+        "sorter": "number",
+        "width": 50,
+        "resizable": true,
+        "frozen": true,
+        "headerFilter": "input",
+        "formatter": "rownum"
+    },
+    {
+        "title": "gene_symbol",
+        "field": "Hugo_Symbol",
+        "sorter": "string",
+        "width": 100,
+        "resizable": true,
+        "frozen": true,
+        "headerFilter": "input"
+    },
+    {
+        "title": "chr_grch37",
+        "field": "Chromosome",
+        "sorter": "string",
+        "width": 40,
+        "resizable": true,
+        "headerFilter": "input"
+    },
+    {
+        "title": "start_grch37",
+        "field": "Start_Position",
+        "sorter": "number",
+        "width": 100,
+        "resizable": true,
+        "hozAlign": "right",
+        "headerFilter": "input",
+        "formatter": "money",
+        "formatterParams": {
+            "precision": 0,
+            "symbol": "",
+            "thousand": ","
+        }
+    },
+    {
+        "title": "chr_grch38",
+        "field": "GRCh38_chrom",
+        "sorter": "string",
+        "width": 200,
+        "resizable": true,
+        "headerFilter": "input"
+    },
+    {
+        "title": "start_grch38",
+        "field": "GRCh38_start",
+        "number": "number",
+        "width": 200,
+        "resizable": true,
+        "headerFilter": "input",
+        "formatter": "money",
+        "formatterParams": {
+            "precision": 0,
+            "symbol": "",
+            "thousand": ","
+        }
+    },
+    {
+        "title": "ref",
+        "field": "Reference_Allele",
+        "sorter": "string",
+        "width": 80,
+        "resizable": true,
+        "headerFilter": "input"
+    },
+    {
+        "title": "alt",
+        "field": "Tumor_Seq_Allele2",
+        "sorter": "string",
+        "width": 80,
+        "resizable": true,
+        "headerFilter": "input"
+    },
+    {
+        "title": "hgvsc",
+        "field": "HGVSc",
+        "sorter": "string",
+        "width": 200,
+        "resizable": true,
+        "headerFilter": "input"
+    },
+    {
+        "title": "hgvsp",
+        "field": "HGVSp",
+        "sorter": "string",
+        "width": 200,
+        "resizable": true,
+        "headerFilter": "input"
+    },
+    {
+        "title": "refseq",
+        "field": "RefSeq",
+        "sorter": "string",
+        "width": 200,
+        "resizable": true,
+        "headerFilter": "input"
+    },
+    {
+        "title": "consequence",
+        "field": "Consequence",
+        "sorter": "string",
+        "width": 200,
+        "resizable": true,
+        "headerFilter": "input"
+    },
+    {
+        "title": "classification",
+        "field": "Variant_Classification",
+        "sorter": "string",
+        "width": 200,
+        "resizable": true,
+        "headerFilter": "input"
+    },
+    {
+        "title": "overall_count",
+        "field": "overall_count",
+        "number": "number",
+        "width": 200,
+        "resizable": true,
+        "headerFilter": "input",
+        "formatter": "money",
+        "formatterParams": {
+            "precision": 0,
+            "symbol": "",
+            "thousand": ","
+        }
+    }
+]
