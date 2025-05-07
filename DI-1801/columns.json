@@ -51,7 +51,7 @@
     {
         "title": "start_grch38",
         "field": "GRCh38_start",
-        "number": "number",
+        "sorter": "number",
         "width": 200,
         "resizable": true,
         "headerFilter": "input",
@@ -119,9 +119,9 @@
         "headerFilter": "input"
     },
     {
-        "title": "overall_count",
-        "field": "overall_count",
-        "number": "number",
+        "title": "all_cancers_count",
+        "field": "all_cancers_count",
+        "sorter": "number",
         "width": 200,
         "resizable": true,
         "headerFilter": "input",

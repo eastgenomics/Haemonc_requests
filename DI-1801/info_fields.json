@@ -31,14 +31,14 @@
         "id": "Consequence",
         "number": ".",
         "type": "String",
-        "description": ".",
+        "description": "Functional consequence of the variant",
         "column_name": "Consequence"
     },
     {
         "id": "Variant_Classification",
         "number": ".",
         "type": "String",
-        "description": ".",
+        "description": "Classification of variant type",
         "column_name": "Variant_Classification"
     },
     {

@@ -263,12 +263,23 @@ def calculate_count_per_haemonc_cancer_type(
     ).reset_index()
 
     # Remove any columns for counts which aren't in the haemonc cancer types
-    all_cols_to_keep = [
+    baseline_cols = [
         "Chromosome",
         "Start_Position",
         "Reference_Allele",
         "Tumor_Seq_Allele2",
-    ] + haemonc_cancer_types
+    ]
+    missing_cancer_types = [
+        col
+        for col in haemonc_cancer_types
+        if col not in pivoted_per_cancer_counts.columns
+    ]
+    if missing_cancer_types:
+        print(
+            "Warning: the following haemonc cancer types are missing from"
+            f" the data: {', '.join(missing_cancer_types)}"
+        )
+    all_cols_to_keep = baseline_cols + haemonc_cancer_types
 
     # Subset to just counts for haemonc cancer types
     per_cancer_haemonc_subset = pivoted_per_cancer_counts[all_cols_to_keep]
@@ -333,9 +344,13 @@ def main():
             "Start_Position": "Int64",
         },
         converters={
-            "Chromosome": str.strip,
-            "Reference_Allele": str.strip,
-            "Tumor_Seq_Allele2": str.strip,
+            "Chromosome": lambda x: x.strip() if isinstance(x, str) else x,
+            "Reference_Allele": lambda x: (
+                x.strip() if isinstance(x, str) else x
+            ),
+            "Tumor_Seq_Allele2": lambda x: (
+                x.strip() if isinstance(x, str) else x
+            ),
         },
     )
     all_cancers_count = calculate_count_for_all_cancers(

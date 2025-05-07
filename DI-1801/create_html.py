@@ -1,5 +1,6 @@
 import argparse
 import pandas as pd
+from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 
 
@@ -57,7 +58,8 @@ def main():
         keep_default_na=False,
     ).to_dict(orient="records")
     columns = read_in_json(args.columns)
-    env = Environment(loader=FileSystemLoader("templates"))
+    template_dir = Path(__file__).with_suffix("").parent / "templates"
+    env = Environment(loader=FileSystemLoader(template_dir))
     template = env.get_template(args.template)
     output = template.render(csv_data=csv_data, columns=columns)
 

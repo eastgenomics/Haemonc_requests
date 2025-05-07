@@ -246,7 +246,7 @@ def write_variants_to_vcf(
         record = vcf_out.new_record(
             contig=str(row["chrom_vcf"]),
             start=int(row["pos_vcf"]) - 1,
-            alleles=(row["ref_vcf"], row["alt_norm"]),
+            alleles=(row["ref_vcf"], row["alt_vcf"]),
             id=".",
             qual=None,
             filter=None,
