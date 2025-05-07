@@ -136,7 +136,9 @@ def convert_maf_like_variant_to_vcf_description(row, fasta):
     # for deletions we want the base before the start, so needs pos - 2
     # https://pysam.readthedocs.io/en/latest/api.html#pysam.FastaFile.fetch
     ref_seq = ""
-    ref_seq = fasta.fetch(chrom, pos - 2, pos + len(ref)).upper()
+    ref_seq = fasta.fetch(
+        chrom, max(0, pos - 2), pos - 1 + max(1, len(ref))
+    ).upper()
     if not ref_seq:
         print(
             "No reference sequence found in FASTA for"
