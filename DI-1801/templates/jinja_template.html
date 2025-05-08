@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+    <!-- gtag.Google tag (js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-XXXXXXXXXX');
+    </script>
+    <!-- end gtag.Google tag (js) -->
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link href="https://unpkg.com/tabulator-tables@6.3.0/dist/css/tabulator.min.css" rel="stylesheet">
+    <title>simple variant database</title>
+</head>
+
+<body>
+    <div id="genie-table"></div>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/luxon@2.3.1/build/global/luxon.min.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables@6.3.0/dist/js/tabulator.min.js"></script>
+    <script type="text/javascript">
+        // Dynamically passed TSV data
+        var csvData = {{ csv_data | tojson }};
+
+        // Dynamically pass column info
+        var columns = {{ columns | tojson }};
+
+        // Define table
+        var table = new Tabulator("#genie-table", {
+            height: 800,
+            data: csvData,
+            persistence: true,
+            movableColumns: true,
+            columns: columns
+        });
+    </script>
+</body>
+
+</html>

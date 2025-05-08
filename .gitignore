@@ -15,7 +15,7 @@ liftOver
 *.csi
 *.tar.gz
 *.fai
-liftOver
-*.json
 *.csv
 *.tsv
+*.html
+!jinja_template.html
