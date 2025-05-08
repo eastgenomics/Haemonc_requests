@@ -220,7 +220,9 @@ def calculate_count_per_haemonc_cancer_type(
             f" the data: {', '.join(missing_cancer_types)}"
         )
     existing_cancer_types = [
-        col for col in haemonc_cancer_types if col in pivoted_per_cancer_counts
+        col
+        for col in haemonc_cancer_types
+        if col in pivoted_per_cancer_counts.columns
     ]
     all_cols_to_keep = VARIANT_COLUMNS + existing_cancer_types
 
