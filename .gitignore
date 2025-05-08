@@ -17,3 +17,5 @@ liftOver
 *.fai
 *.csv
 *.tsv
+*.html
+!jinja_template.html
