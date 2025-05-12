@@ -199,6 +199,10 @@ def convert_to_vcf_representation(genie_count_data, fasta):
         )
     )
 
+    genie_count_data["Consequence"] = genie_count_data[
+        "Consequence"
+    ].str.replace(",", "&")
+
     return genie_count_data
 
 
@@ -234,7 +238,7 @@ def write_variants_to_vcf(
             field["id"], field["number"], field["type"], field["description"]
         )
     header.info.add(
-        "Genie_original_description",
+        "Genie_description",
         "1",
         "String",
         "Original variant info from Genie",
@@ -262,15 +266,11 @@ def write_variants_to_vcf(
                 elif field_type == "Integer":
                     field_value = int(row[field_name])
 
-                if field_name == "Consequence":
-                    # Replace any commas with "&" to avoid VCF parsing issues
-                    # of commas
-                    field_value = field_value.replace(",", "&")
                 record.info[field["id"]] = field_value
 
         # Add in original Genie GRCh37 chrom-pos-ref-alt
         orig_coord_str = f"{row['Chromosome']}_{row['Start_Position']}_{row['Reference_Allele']}_{row['Tumor_Seq_Allele2']}"
-        record.info["Genie_original_description"] = orig_coord_str
+        record.info["Genie_description"] = orig_coord_str
 
         vcf_out.write(record)
 

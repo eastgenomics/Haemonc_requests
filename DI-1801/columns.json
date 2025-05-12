@@ -18,16 +18,16 @@
         "headerFilter": "input"
     },
     {
-        "title": "chr_grch37",
-        "field": "Chromosome",
+        "title": "chrom_grch38",
+        "field": "chrom_grch38",
         "sorter": "string",
-        "width": 40,
+        "width": 50,
         "resizable": true,
         "headerFilter": "input"
     },
     {
-        "title": "start_grch37",
-        "field": "Start_Position",
+        "title": "pos_grch38",
+        "field": "pos_grch38",
         "sorter": "number",
         "width": 100,
         "resizable": true,
@@ -41,16 +41,72 @@
         }
     },
     {
-        "title": "chr_grch38",
-        "field": "GRCh38_chrom",
+        "title": "ref_grch38",
+        "field": "ref_grch38",
+        "sorter": "string",
+        "width": 150,
+        "resizable": true,
+        "headerFilter": "input"
+    },
+    {
+        "title": "alt_grch38",
+        "field": "alt_grch38",
+        "sorter": "string",
+        "width": 150,
+        "resizable": true,
+        "headerFilter": "input"
+    },
+    {
+        "title": "Genie_description",
+        "field": "Genie_description",
         "sorter": "string",
         "width": 200,
         "resizable": true,
         "headerFilter": "input"
     },
     {
-        "title": "start_grch38",
-        "field": "GRCh38_start",
+        "title": "HGVSc",
+        "field": "HGVSc",
+        "sorter": "string",
+        "width": 300,
+        "resizable": true,
+        "headerFilter": "input"
+    },
+    {
+        "title": "HGVSp",
+        "field": "HGVSp",
+        "sorter": "string",
+        "width": 200,
+        "resizable": true,
+        "headerFilter": "input"
+    },
+    {
+        "title": "RefSeq",
+        "field": "RefSeq",
+        "sorter": "string",
+        "width": 150,
+        "resizable": true,
+        "headerFilter": "input"
+    },
+    {
+        "title": "Consequence",
+        "field": "Consequence",
+        "sorter": "string",
+        "width": 200,
+        "resizable": true,
+        "headerFilter": "input"
+    },
+    {
+        "title": "Variant_Classification",
+        "field": "Variant_Classification",
+        "sorter": "string",
+        "width": 200,
+        "resizable": true,
+        "headerFilter": "input"
+    },
+    {
+        "title": "all_cancers_count",
+        "field": "all_cancers_count",
         "sorter": "number",
         "width": 200,
         "resizable": true,
@@ -63,64 +119,288 @@
         }
     },
     {
-        "title": "ref",
-        "field": "Reference_Allele",
-        "sorter": "string",
-        "width": 80,
-        "resizable": true,
-        "headerFilter": "input"
-    },
-    {
-        "title": "alt",
-        "field": "Tumor_Seq_Allele2",
-        "sorter": "string",
-        "width": 80,
-        "resizable": true,
-        "headerFilter": "input"
-    },
-    {
-        "title": "hgvsc",
-        "field": "HGVSc",
-        "sorter": "string",
+        "title": "haemonc_cancers_count",
+        "field": "haemonc_cancers_count",
+        "sorter": "number",
         "width": 200,
         "resizable": true,
-        "headerFilter": "input"
+        "headerFilter": "input",
+        "formatter": "money",
+        "formatterParams": {
+            "precision": 0,
+            "symbol": "",
+            "thousand": ","
+        }
     },
     {
-        "title": "hgvsp",
-        "field": "HGVSp",
-        "sorter": "string",
+        "title": "Blastic Plasmacytoid Dendritic Cell Neoplasm_count",
+        "field": "Blastic Plasmacytoid Dendritic Cell Neoplasm_count",
+        "sorter": "number",
         "width": 200,
         "resizable": true,
-        "headerFilter": "input"
+        "headerFilter": "input",
+        "formatter": "money",
+        "formatterParams": {
+            "precision": 0,
+            "symbol": "",
+            "thousand": ","
+        }
     },
     {
-        "title": "refseq",
-        "field": "RefSeq",
-        "sorter": "string",
+        "title": "Blood Cancer, NOS_count",
+        "field": "Blood Cancer, NOS_count",
+        "sorter": "number",
         "width": 200,
         "resizable": true,
-        "headerFilter": "input"
+        "headerFilter": "input",
+        "formatter": "money",
+        "formatterParams": {
+            "precision": 0,
+            "symbol": "",
+            "thousand": ","
+        }
     },
     {
-        "title": "consequence",
-        "field": "Consequence",
-        "sorter": "string",
+        "title": "Posttransplant Lymphoproliferative Disorders_count",
+        "field": "Posttransplant Lymphoproliferative Disorders_count",
+        "sorter": "number",
         "width": 200,
         "resizable": true,
-        "headerFilter": "input"
+        "headerFilter": "input",
+        "formatter": "money",
+        "formatterParams": {
+            "precision": 0,
+            "symbol": "",
+            "thousand": ","
+        }
     },
     {
-        "title": "classification",
-        "field": "Variant_Classification",
-        "sorter": "string",
+        "title": "Non-Hodgkin Lymphoma_count",
+        "field": "Non-Hodgkin Lymphoma_count",
+        "sorter": "number",
         "width": 200,
         "resizable": true,
-        "headerFilter": "input"
+        "headerFilter": "input",
+        "formatter": "money",
+        "formatterParams": {
+            "precision": 0,
+            "symbol": "",
+            "thousand": ","
+        }
     },
     {
-        "title": "all_cancers_count",
-        "field": "all_cancers_count",
+        "title": "Angiomatoid Fibrous Histiocytoma_count",
+        "field": "Angiomatoid Fibrous Histiocytoma_count",
+        "sorter": "number",
+        "width": 200,
+        "resizable": true,
+        "headerFilter": "input",
+        "formatter": "money",
+        "formatterParams": {
+            "precision": 0,
+            "symbol": "",
+            "thousand": ","
+        }
+    },
+    {
+        "title": "Myelodysplastic/Myeloproliferative Neoplasms_count",
+        "field": "Myelodysplastic/Myeloproliferative Neoplasms_count",
+        "sorter": "number",
+        "width": 200,
+        "resizable": true,
+        "headerFilter": "input",
+        "formatter": "money",
+        "formatterParams": {
+            "precision": 0,
+            "symbol": "",
+            "thousand": ","
+        }
+    },
+    {
+        "title": "Histiocytosis_count",
+        "field": "Histiocytosis_count",
+        "sorter": "number",
+        "width": 200,
+        "resizable": true,
+        "headerFilter": "input",
+        "formatter": "money",
+        "formatterParams": {
+            "precision": 0,
+            "symbol": "",
+            "thousand": ","
+        }
+    },
+    {
+        "title": "Lymphatic Cancer_count",
+        "field": "Lymphatic Cancer_count",
+        "sorter": "number",
+        "width": 200,
+        "resizable": true,
+        "headerFilter": "input",
+        "formatter": "money",
+        "formatterParams": {
+            "precision": 0,
+            "symbol": "",
+            "thousand": ","
+        }
+    },
+    {
+        "title": "Blood Cancer_count",
+        "field": "Blood Cancer_count",
+        "sorter": "number",
+        "width": 200,
+        "resizable": true,
+        "headerFilter": "input",
+        "formatter": "money",
+        "formatterParams": {
+            "precision": 0,
+            "symbol": "",
+            "thousand": ","
+        }
+    },
+    {
+        "title": "Hodgkin Lymphoma_count",
+        "field": "Hodgkin Lymphoma_count",
+        "sorter": "number",
+        "width": 200,
+        "resizable": true,
+        "headerFilter": "input",
+        "formatter": "money",
+        "formatterParams": {
+            "precision": 0,
+            "symbol": "",
+            "thousand": ","
+        }
+    },
+    {
+        "title": "Mature T and NK Neoplasms_count",
+        "field": "Mature T and NK Neoplasms_count",
+        "sorter": "number",
+        "width": 200,
+        "resizable": true,
+        "headerFilter": "input",
+        "formatter": "money",
+        "formatterParams": {
+            "precision": 0,
+            "symbol": "",
+            "thousand": ","
+        }
+    },
+    {
+        "title": "Myelodysplastic Syndromes_count",
+        "field": "Myelodysplastic Syndromes_count",
+        "sorter": "number",
+        "width": 200,
+        "resizable": true,
+        "headerFilter": "input",
+        "formatter": "money",
+        "formatterParams": {
+            "precision": 0,
+            "symbol": "",
+            "thousand": ","
+        }
+    },
+    {
+        "title": "Mastocytosis_count",
+        "field": "Mastocytosis_count",
+        "sorter": "number",
+        "width": 200,
+        "resizable": true,
+        "headerFilter": "input",
+        "formatter": "money",
+        "formatterParams": {
+            "precision": 0,
+            "symbol": "",
+            "thousand": ","
+        }
+    },
+    {
+        "title": "B-Lymphoblastic Leukemia/Lymphoma_count",
+        "field": "B-Lymphoblastic Leukemia/Lymphoma_count",
+        "sorter": "number",
+        "width": 200,
+        "resizable": true,
+        "headerFilter": "input",
+        "formatter": "money",
+        "formatterParams": {
+            "precision": 0,
+            "symbol": "",
+            "thousand": ","
+        }
+    },
+    {
+        "title": "Lymphatic Cancer, NOS_count",
+        "field": "Lymphatic Cancer, NOS_count",
+        "sorter": "number",
+        "width": 200,
+        "resizable": true,
+        "headerFilter": "input",
+        "formatter": "money",
+        "formatterParams": {
+            "precision": 0,
+            "symbol": "",
+            "thousand": ","
+        }
+    },
+    {
+        "title": "T-Lymphoblastic Leukemia/Lymphoma_count",
+        "field": "T-Lymphoblastic Leukemia/Lymphoma_count",
+        "sorter": "number",
+        "width": 200,
+        "resizable": true,
+        "headerFilter": "input",
+        "formatter": "money",
+        "formatterParams": {
+            "precision": 0,
+            "symbol": "",
+            "thousand": ","
+        }
+    },
+    {
+        "title": "Leukemia_count",
+        "field": "Leukemia_count",
+        "sorter": "number",
+        "width": 200,
+        "resizable": true,
+        "headerFilter": "input",
+        "formatter": "money",
+        "formatterParams": {
+            "precision": 0,
+            "symbol": "",
+            "thousand": ","
+        }
+    },
+    {
+        "title": "Myeloproliferative Neoplasms_count",
+        "field": "Myeloproliferative Neoplasms_count",
+        "sorter": "number",
+        "width": 200,
+        "resizable": true,
+        "headerFilter": "input",
+        "formatter": "money",
+        "formatterParams": {
+            "precision": 0,
+            "symbol": "",
+            "thousand": ","
+        }
+    },
+    {
+        "title": "Mature B-Cell Neoplasms_count",
+        "field": "Mature B-Cell Neoplasms_count",
+        "sorter": "number",
+        "width": 200,
+        "resizable": true,
+        "headerFilter": "input",
+        "formatter": "money",
+        "formatterParams": {
+            "precision": 0,
+            "symbol": "",
+            "thousand": ","
+        }
+    },
+    {
+        "title": "Myeloid Neoplasms with Germ Line Predisposition_count",
+        "field": "Myeloid Neoplasms with Germ Line Predisposition_count",
         "sorter": "number",
         "width": 200,
         "resizable": true,
