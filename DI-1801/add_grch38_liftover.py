@@ -15,13 +15,16 @@ def parse_args() -> argparse.Namespace:
         Namespace of passed command line argument inputs
     """
     parser = argparse.ArgumentParser(
-        description="Information required to add GRCh38 lifted over variants"
+        description="Information required to add GRCh38 liftover information"
     )
     parser.add_argument(
         "--csv",
         required=True,
         type=str,
-        help="Path to CSV file to add GRCh38 lifted over variants to",
+        help=(
+            "Path to CSV file of variant counts to add GRCh38 lifted over"
+            " variants to"
+        ),
     )
 
     parser.add_argument(
@@ -35,7 +38,7 @@ def parse_args() -> argparse.Namespace:
         "--output",
         required=True,
         type=str,
-        help="Name of output CSV file with GRCh38 lifted over variants added",
+        help="Name of output CSV file with GRCh38 liftover info added",
     )
 
     return parser.parse_args()
@@ -43,12 +46,12 @@ def parse_args() -> argparse.Namespace:
 
 def read_vcf_to_df(vcf_file: str) -> pd.DataFrame:
     """
-    Read in a VCF file into a dataframe.
+    Read in VCF file to a dataframe.
 
     Parameters
     ----------
     vcf_file : str
-        Path to the VCF file.
+        Path to the VCF file to read in.
 
     Returns
     -------
@@ -60,13 +63,13 @@ def read_vcf_to_df(vcf_file: str) -> pd.DataFrame:
     # Store required data from GRCh38 VCF in a list of dictionaries then
     # convert to a DataFrame
     records = []
-    for rec in vcf_in:
+    for record in vcf_in:
         row = {
-            "CHROM": str(rec.chrom),
-            "POS": int(rec.pos),
-            "REF": str(rec.ref),
-            "ALT": ",".join(str(a) for a in rec.alts),
-            "Genie_description": rec.info.get("Genie_description", None),
+            "CHROM": str(record.chrom),
+            "POS": int(record.pos),
+            "REF": str(record.ref),
+            "ALT": ",".join(str(a) for a in record.alts),
+            "Genie_description": record.info.get("Genie_description", None),
         }
 
         records.append(row)
@@ -80,19 +83,19 @@ def merge_dataframes(
     b37_count_csv: pd.DataFrame, vcf_df: pd.DataFrame
 ) -> pd.DataFrame:
     """
-    Merge two dataframes on the common columns
+    Merge two dataframes on common columns.
 
     Parameters
     ----------
     b37_count_csv : pd.DataFrame
         DataFrame containing the b37 count CSV data.
     vcf_df : pd.DataFrame
-        DataFrame containing the VCF data with GRCh38 lifted over.
+        DataFrame containing the VCF data with GRCh38 liftover information
 
     Returns
     -------
     merged_df : pd.DataFrame
-        Merged DataFrame
+        Merged DataFrame with GRCh38 liftover information added
     """
     merged_df = pd.merge(
         b37_count_csv,
@@ -144,6 +147,8 @@ def main():
         sep=",",
         header=0,
     )
+    # Add field so we can match each variant with the Genie description
+    # INFO field in the VCF file
     b37_count_csv["variant_description"] = (
         b37_count_csv["Chromosome"].astype(str)
         + "_"

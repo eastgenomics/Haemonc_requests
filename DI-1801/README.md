@@ -3,8 +3,7 @@ This folder contains scripts to take Genie MAF data, aggregate counts of each va
 convert each variant to a VCF-like description and output to a CSV and VCF.
 
 ### Subset Genie data
-The original Genie data has millions of rows, therefore we are going to subset the data to only
-variants in genies that are present in the haemonc BED file.
+The original Genie data has millions of rows, therefore we are going to subset the data to only variants in genies that are present in the Uranus pipeline for simpler processing. This requires a haemonc BED file, an email to identify yourself with Entrez and any extra symbols to include (optional).
 Example command:
 ```
 python subset_genie_data.py \
@@ -16,7 +15,7 @@ python subset_genie_data.py \
 ```
 
 ### Merge sample info
-We need to merge in the clinical data (patient IDs, cancer types etc.) so that we can generate
+We need to merge in the clinical data (patient IDs, cancer types etc.) from Genie for each sample so that we can generate
 count information.
 Example command:
 ```
@@ -42,34 +41,37 @@ Because each variant is in MAF-like format, in order to represent Genie variants
 as variants would be represented in a Uranus sample VCF, we want to convert them to a VCF-like
 description. This also means we can perform liftover to GRCh38 properly.
 A JSON file representing details of the fields to keep as INFO fields in the output VCF is required;
-an example `info_fields.json` is provided.
+an example `info_fields.json` is provided, and a FASTA (sourced from Ensembl) is also required for the GRCh37 reference genome.
 Example command:
 ```
 python convert_counts_to_vcf.py \
   --input genie_17_aggregated_counts_GRCh37.txt \
   --fasta Homo_sapiens.GRCh37.dna.toplevel.fa.gz \
+  --info_fields info_fields.json \
   --output_csv genie_17_aggregated_counts_GRCh37_vcf_description.csv \
   --output_vcf genie_17_aggregated_counts_GRCh37.vcf \
-  --info_fields info_fields.json
 ```
 
+Note: the VCF should then be sorted, compressed and normalised with bcftools and lifted over to GRCh38 with Picard LiftoverVcf.
+
 ### Add GRCh38 liftover to counts CSV
-To make a final CSV with GRCh38 lifted over variants and their aggregate counts, we want to read
-the VCF back into a dataframe and merge it with the CSV of counts in GRCh37.
+To make a final CSV with GRCh38 lifted over variants and their aggregate counts, we want to read the CSV with count data in GRCh37 and the lifted over VCF back into a dataframe and merge the GRCh38 variant info with the CSV to write a final CSV file.
 Example command:
 ```
 python add_grch38_liftover.py \
+  --csv genie_17_aggregated_counts_GRCh37_vcf_description.csv \
+  --vcf Genie_v17_aggregated_GRCh38_v1.0.0.vcf.gz \
+  --output Genie_v17_aggregated_GRCh38_v1.0.0.csv
 ```
 
 ### Create HTML table file
-From the output CSV, we want to generate a searchable HTML table with Tabulator.
-A JSON file representing the columns to keep in the HTML file from the Genie count data CSV
-is required; an example `columns.json` file is provided.
+From the final CSV we want to generate a searchable HTML table with Tabulator.
+A JSON file representing the columns to keep in the HTML file from the Genie count data CSV is required; an example `columns.json` file is provided. We also provide the name of the Jinja HTML template (`jinja_template.html`) in the /templates directory which the CSV data will be inserted into.
 Example command:
 ```
 python create_html.py \
-    --input genie_17_aggregated_counts_GRCh38.csv \
+    --input Genie_v17_aggregated_GRCh38_v1.0.0.csv \
     --columns columns.json \
     --template jinja_template.html \
-    --output genie_17_aggregated_counts_GRCh38.html
+    --output Genie_v17_aggregated_GRCh38_v1.0.0.html
 ```
