@@ -4,6 +4,13 @@ import pandas as pd
 
 from utils import read_in_to_df, read_txt_file_to_list
 
+VARIANT_COLUMNS = [
+    "Chromosome",
+    "Start_Position",
+    "Reference_Allele",
+    "Tumor_Seq_Allele2",
+]
+
 
 def parse_args() -> argparse.Namespace:
     """
@@ -60,25 +67,13 @@ def calculate_count_for_all_cancers(genie_data_with_sample_info):
     """
     # Drop duplicates per variant, group by each variant and count how many
     # patients have that variant, aggregating other fields with an & char
+    subset_fields = ["PATIENT_ID"] + VARIANT_COLUMNS
     overall_count_per_variant = (
         genie_data_with_sample_info.drop_duplicates(
-            subset=[
-                "PATIENT_ID",
-                "Chromosome",
-                "Start_Position",
-                "Reference_Allele",
-                "Tumor_Seq_Allele2",
-            ],
+            subset=subset_fields,
             keep="first",
         )
-        .groupby(
-            [
-                "Chromosome",
-                "Start_Position",
-                "Reference_Allele",
-                "Tumor_Seq_Allele2",
-            ]
-        )
+        .groupby(VARIANT_COLUMNS)
         .agg(
             {
                 "PATIENT_ID": "count",
@@ -143,29 +138,12 @@ def calculate_count_for_all_haemonc_cancers(
     """
     # Create multiindex of all unique variants in the dataset
     all_variant_index = genie_data_with_sample_info.drop_duplicates(
-        subset=[
-            "Chromosome",
-            "Start_Position",
-            "Reference_Allele",
-            "Tumor_Seq_Allele2",
-        ]
-    )[
-        [
-            "Chromosome",
-            "Start_Position",
-            "Reference_Allele",
-            "Tumor_Seq_Allele2",
-        ]
-    ]
+        subset=VARIANT_COLUMNS
+    )[VARIANT_COLUMNS]
 
     # Create index from the four variant columns
     all_variant_index = all_variant_index.set_index(
-        [
-            "Chromosome",
-            "Start_Position",
-            "Reference_Allele",
-            "Tumor_Seq_Allele2",
-        ]
+        VARIANT_COLUMNS
     ).sort_index()
 
     # Subset to just haemonc cancer types
@@ -173,25 +151,11 @@ def calculate_count_for_all_haemonc_cancers(
         genie_data_with_sample_info["CANCER_TYPE"].isin(haemonc_cancer_types)
     ]
 
+    subset_fields = ["PATIENT_ID"] + VARIANT_COLUMNS
     # Group by patient and variant and count
     haemonc_cancer_counts = (
-        haemonc_cancer_type_rows.drop_duplicates(
-            subset=[
-                "PATIENT_ID",
-                "Chromosome",
-                "Start_Position",
-                "Reference_Allele",
-                "Tumor_Seq_Allele2",
-            ]
-        )
-        .groupby(
-            [
-                "Chromosome",
-                "Start_Position",
-                "Reference_Allele",
-                "Tumor_Seq_Allele2",
-            ]
-        )
+        haemonc_cancer_type_rows.drop_duplicates(subset=subset_fields)
+        .groupby(VARIANT_COLUMNS)
         .agg(haemonc_cancers_count=("PATIENT_ID", "count"))
     )
 
@@ -225,50 +189,26 @@ def calculate_count_per_haemonc_cancer_type(
         dataframe with one row per variant and columns with counts of that
         variant for each haemonc cancer type
     """
+    subset_fields = ["PATIENT_ID"] + VARIANT_COLUMNS + ["CANCER_TYPE"]
+    groupby_fields = VARIANT_COLUMNS + ["CANCER_TYPE"]
     per_cancer_counts = (
         genie_data_with_sample_info.drop_duplicates(
-            subset=[
-                "PATIENT_ID",
-                "Chromosome",
-                "Start_Position",
-                "Reference_Allele",
-                "Tumor_Seq_Allele2",
-                "CANCER_TYPE",
-            ],
+            subset=subset_fields,
             keep="first",
         )
-        .groupby(
-            [
-                "Chromosome",
-                "Start_Position",
-                "Reference_Allele",
-                "Tumor_Seq_Allele2",
-                "CANCER_TYPE",
-            ]
-        )
+        .groupby(groupby_fields)
         .size()
         .reset_index(name="variant_count")
     )
 
     pivoted_per_cancer_counts = per_cancer_counts.pivot_table(
-        index=[
-            "Chromosome",
-            "Start_Position",
-            "Reference_Allele",
-            "Tumor_Seq_Allele2",
-        ],
+        index=VARIANT_COLUMNS,
         columns="CANCER_TYPE",
         values="variant_count",
         fill_value=0,
     ).reset_index()
 
     # Remove any columns for counts which aren't in the haemonc cancer types
-    baseline_cols = [
-        "Chromosome",
-        "Start_Position",
-        "Reference_Allele",
-        "Tumor_Seq_Allele2",
-    ]
     missing_cancer_types = [
         col
         for col in haemonc_cancer_types
@@ -279,23 +219,18 @@ def calculate_count_per_haemonc_cancer_type(
             "Warning: the following haemonc cancer types are missing from"
             f" the data: {', '.join(missing_cancer_types)}"
         )
-    all_cols_to_keep = baseline_cols + haemonc_cancer_types
+    existing_cancer_types = [
+        col
+        for col in haemonc_cancer_types
+        if col in pivoted_per_cancer_counts.columns
+    ]
+    all_cols_to_keep = VARIANT_COLUMNS + existing_cancer_types
 
     # Subset to just counts for haemonc cancer types
     per_cancer_haemonc_subset = pivoted_per_cancer_counts[all_cols_to_keep]
     # Add '_count' suffix to each count column
     per_cancer_haemonc_subset.columns = [
-        (
-            col
-            if col
-            in [
-                "Chromosome",
-                "Start_Position",
-                "Reference_Allele",
-                "Tumor_Seq_Allele2",
-            ]
-            else f"{col}_count"
-        )
+        (col if col in VARIANT_COLUMNS else f"{col}_count")
         for col in per_cancer_haemonc_subset.columns
     ]
 
@@ -322,12 +257,7 @@ def merge_counts_together(df1, df2):
     merged_counts = pd.merge(
         df1,
         df2,
-        on=[
-            "Chromosome",
-            "Start_Position",
-            "Reference_Allele",
-            "Tumor_Seq_Allele2",
-        ],
+        on=VARIANT_COLUMNS,
         how="left",
     )
 
@@ -344,13 +274,8 @@ def main():
             "Start_Position": "Int64",
         },
         converters={
-            "Chromosome": lambda x: x.strip() if isinstance(x, str) else x,
-            "Reference_Allele": lambda x: (
-                x.strip() if isinstance(x, str) else x
-            ),
-            "Tumor_Seq_Allele2": lambda x: (
-                x.strip() if isinstance(x, str) else x
-            ),
+            col: lambda x: x.strip() if isinstance(x, str) else x
+            for col in ["Chromosome", "Reference_Allele", "Tumor_Seq_Allele2"]
         },
     )
     all_cancers_count = calculate_count_for_all_cancers(
