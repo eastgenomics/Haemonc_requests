@@ -8,6 +8,7 @@ import re
 import io as io
 
 project_id = "project-J4V0y18454QjYbJjzY09XxQp"
+folder = "/output/MYE-251122_1929/eggd_multiqc_to_workbooks-1.0.1"
 file_search_term = ".*xlsx"
 
 # find the necessary files
@@ -35,6 +36,7 @@ def find_files_in_project(project: dict, name: str,
             project=project_id,
             name=name,
             name_mode=name_mode,
+            folder= folder,
             classname="file",
             describe={
                 "fields": {
@@ -126,7 +128,7 @@ for file_id in all_excels["file_id"]:
        f"dx cat {file_id} "
     )
     output = subprocess.run(cmd, shell=True,
-                             capture_output=True, check=False)
+                             capture_output=True, check=True)
     # use openpyxl for hyperlink functionality
     sample_excel = openpyxl.load_workbook(io.BytesIO(output.stdout),
                                            data_only=False)
@@ -145,11 +147,9 @@ for file_id in all_excels["file_id"]:
                 # cell.hyperlink showing none and cell.style showing normal
                 # cell.value showing a hyperlink string
                 if "=HYPERLINK"in str(cell.value):
-                    print(cell.value)
                     # extract value from hyperlink strin
                     new_value = str(cell.value).split(",")[1].split(")")[0]
                     cell.value = float(new_value)
-                    print(cell.value)
         # convert to dataframe 
         sample_data = sample_sheet.values
         colnames = [c.value for c in next(sample_sheet.iter_rows(min_row=1,
@@ -168,6 +168,13 @@ merged_excel.insert(1, "Included_or_Excluded", included_excluded_col)
 
 # save to excel
 print(merged_excel)
+
+# check number of sample
+unique_samples = pd.unique(merged_excel['sampleName'])
+print("number of Samples expected is: ", all_excels["file_id"])
+print(unique_samples)
+print("Number of Unique samples in excel:", len(unique_samples))
+
 merged_excel.to_excel("002_251121_A01295_0638_BHFWLTDRX7_MYE_merged_workbooks.xlsx",
                        index=False)
 
