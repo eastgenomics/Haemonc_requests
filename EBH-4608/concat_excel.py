@@ -28,7 +28,7 @@ def find_files_in_project(project: dict, name: str,
     Returns
     -------
     list
-        A list of VCF file objects matching the name.
+        A list of excel file objects matching the name.
     """
     excels = list(
         dxpy.find_data_objects(
@@ -48,18 +48,18 @@ def find_files_in_project(project: dict, name: str,
 
     return excels
 
-
+# convert file information into dataframe
 def convert_to_df(
-    vcf_list: list
+    excel_list: list
 ) -> pd.DataFrame:
     """
-    Convert a list of VCF file metadata to a pandas DataFrame, exclude rows
+    Convert a list of excel file metadata to a pandas DataFrame, exclude rows
     from DF using exclude_projects and exclude_samples lists.
 
     Parameters
     ----------
-    vcf_list : list
-        list of VCF file metadata dicts.
+    excel_list : list
+        list of excel file metadata dicts.
     exclude_projects : list
         List of project IDs to exclude from the DataFrame.
     exclude_samples : list
@@ -68,7 +68,7 @@ def convert_to_df(
     Returns
     -------
     pd.DataFrame
-        A DataFrame containing the VCF file metadata.
+        A DataFrame containing the excel file metadata.
     """
     flat_list = [
         {
@@ -79,7 +79,7 @@ def convert_to_df(
             "created": item["describe"]["created"],
             "archive_state": item["describe"]["archivalState"],
         }
-        for item in vcf_list
+        for item in excel_list
     ]
     df = pd.DataFrame(flat_list)
 
@@ -89,6 +89,8 @@ def convert_to_df(
     df["assay"] = df["project_name"].str.split("_").str[-1]
 
     return df
+
+### Gather excel file IDs ###
 
 excels = []
 excels_in_project = find_files_in_project(
@@ -101,6 +103,7 @@ excels.extend(excels_in_project)
 
 all_excels = convert_to_df(excels)
 
+# save excel file detail 
 all_excels.to_csv(
         f"all_run_excels.tsv",
         sep="\t",
@@ -108,37 +111,49 @@ all_excels.to_csv(
     )
 print(all_excels)
 
+
+### combine data drom included and excluded sheets  of each excel ##
+
 # create empty dataframe
 merged_excel = pd.DataFrame()
 
-
-# loop over files
 for file_id in all_excels["file_id"]:
     print(file_id)
+
+    # Use dx cat as dxpy.open_dxfile method would lead to
+    # hyperlinks being removed for all cells
     cmd = (
        f"dx cat {file_id} "
     )
-    output = subprocess.run(cmd, shell=True, capture_output=True, check=False)
-    #file = dxpy.open_dxfile(file_id, project=project_id, mode="rb")
-    #print(file)
-    # file_contents = file.read()
-    # print(output) 
-    sample_excel = openpyxl.load_workbook(io.BytesIO(output.stdout), data_only=False )
+    output = subprocess.run(cmd, shell=True,
+                             capture_output=True, check=False)
+    # use openpyxl for hyperlink functionality
+    sample_excel = openpyxl.load_workbook(io.BytesIO(output.stdout),
+                                           data_only=False)
+
+    # sheets of interest are included and excluded
     for sheet in ["included", "excluded"]:
         sample_sheet = sample_excel[sheet]
         max_row = sample_sheet.max_row
         # remove hyperlink from gnomad (row 20 and 21)
-        for row in sample_sheet.iter_cols(min_col=20, max_col=21, min_row = 0, max_row = max_row):
+        for row in sample_sheet.iter_cols(min_col=20, 
+                                          max_col=21,
+                                          min_row = 0,
+                                          max_row = max_row):
             #for row in sample_sheet.iter_rows(min_row=0, max_row=max_row):
             for cell in row:
+                # cell.hyperlink showing none and cell.style showing normal
+                # cell.value showing a hyperlink string
                 if "=HYPERLINK"in str(cell.value):
                     print(cell.value)
+                    # extract value from hyperlink strin
                     new_value = str(cell.value).split(",")[1].split(")")[0]
                     cell.value = float(new_value)
                     print(cell.value)
         # convert to dataframe 
         sample_data = sample_sheet.values
-        colnames = [c.value for c in next(sample_sheet.iter_rows(min_row=1, max_row=1))]
+        colnames = [c.value for c in next(sample_sheet.iter_rows(min_row=1,
+                                                                 max_row=1))]
         sample_tab = pd.DataFrame(sample_data, columns=colnames)
         # remove first row because duplicated index
         sample_tab = sample_tab.drop([0])
@@ -149,11 +164,10 @@ for file_id in all_excels["file_id"]:
 
 # move included or excluded column to front so easily visible
 included_excluded_col = merged_excel.pop("Included_or_Excluded")
-merged_excel.insert(1, "Included_or_Excluded", included_excluded_col)  
+merged_excel.insert(1, "Included_or_Excluded", included_excluded_col)
 
 # save to excel
 print(merged_excel)
-merged_excel.to_excel("002_251121_A01295_0638_BHFWLTDRX7_MYE_merged_workbooks.xlsx", index=False)
-# print(merged_excel["gnomADe AF"])
+merged_excel.to_excel("002_251121_A01295_0638_BHFWLTDRX7_MYE_merged_workbooks.xlsx",
+                       index=False)
 
-# for each sheet in each file, convert each sheet to a dataframe, add column with sample IF
