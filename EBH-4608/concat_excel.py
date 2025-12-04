@@ -137,19 +137,29 @@ for file_id in all_excels["file_id"]:
     for sheet in ["included", "excluded"]:
         sample_sheet = sample_excel[sheet]
         max_row = sample_sheet.max_row
-        # remove hyperlink from gnomad (row 20 and 21)
-        for row in sample_sheet.iter_cols(min_col=20, 
+        # remove hyperlink from gnomad (column 20 and 21, min row 2 to skip header)
+        for col in sample_sheet.iter_cols(min_col=20,
                                           max_col=21,
-                                          min_row = 0,
+                                          min_row = 2,
                                           max_row = max_row):
-            #for row in sample_sheet.iter_rows(min_row=0, max_row=max_row):
-            for cell in row:
+            for cell in col:
                 # cell.hyperlink showing none and cell.style showing normal
                 # cell.value showing a hyperlink string
-                if "=HYPERLINK"in str(cell.value):
-                    # extract value from hyperlink strin
-                    new_value = str(cell.value).split(",")[1].split(")")[0]
-                    cell.value = float(new_value)
+
+                formula = str(cell.value)
+                 # cell.hyperlink is None; value is '=HYPERLINK("url","value")'
+                if "=HYPERLINK" in formula:
+                    print(formula)
+                    match = re.search(
+                    r'=HYPERLINK\(".*?",\s*"?([^")]+)"?\)', formula)
+                    if match:
+                        display_value = match.group(1)
+                        try:
+                            cell.value = float(display_value)
+                        except ValueError:
+                        # fall back to raw string if not numeric
+                            cell.value = display_value
+                            print(cell.value)
         # convert to dataframe 
         sample_data = sample_sheet.values
         colnames = [c.value for c in next(sample_sheet.iter_rows(min_row=1,
@@ -171,7 +181,7 @@ print(merged_excel)
 
 # check number of sample
 unique_samples = pd.unique(merged_excel['sampleName'])
-print("number of Samples expected is: ", all_excels["file_id"])
+print("number of Samples expected is: ", len(all_excels["file_id"]))
 print(unique_samples)
 print("Number of Unique samples in excel:", len(unique_samples))
 
